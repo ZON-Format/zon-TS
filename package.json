@@ -1,0 +1,46 @@
+{
+  "name": "zon-format",
+  "version": "1.0.2",
+  "description": "Zero Overhead Notation v1.0.2 - Human-readable data format with 30%+ compression over JSON",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "zon",
+    "serialization",
+    "llm",
+    "compression",
+    "token-efficiency",
+    "data-format",
+    "json-alternative",
+    "toon",
+    "token-efficient"
+  ],
+  "author": "Roni Bhakta <ronibhakta1@gmail.com>",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZON-Format/zon-TS.git"
+  },
+  "homepage": "https://github.com/ZON-Format/zon-TS",
+  "bugs": {
+    "url": "https://github.com/ZON-Format/zon-TS/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  }
+}
