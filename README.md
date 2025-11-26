@@ -1,4 +1,4 @@
-# ZON Format v1.0.2 - TypeScript/JavaScript
+# ZON Format v1.0.0 - TypeScript/JavaScript
 
 **Zero Overhead Notation** - A human-readable data serialization format optimized for LLM token efficiency, JSON for LLMs.
 
@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-orange.svg)](LICENSE)
 
-> 🚀 **24-40% better compression than TOON** | 📊 **30-42% compression vs JSON** | 🔍 **100% Human Readable**
+> 🚀 **14% better compression than TOON** | 📊 **30-67% compression vs JSON** | 🔍 **100% Human Readable**
 
 ---
 
@@ -29,7 +29,7 @@ ZON is a **smart compression format** designed specifically for transmitting str
 
 | Problem | Solution |
 | :--- | :--- |
-| 💸 **High LLM costs** from verbose JSON | ZON reduces tokens by 30-42% |
+| 💸 **High LLM costs** from verbose JSON | ZON reduces tokens by 30-67% |
 | 🔍 **Binary formats aren't debuggable** | ZON is plain text - you can read it! |
 | 🎯 **One-size-fits-all compression** | ZON auto-selects optimal strategy per column |
 
@@ -39,6 +39,33 @@ ZON is a **smart compression format** designed specifically for transmitting str
 - ✅ **100% Safe**: Guaranteed lossless reconstruction
 - ✅ **Zero Configuration**: Works out of the box
 - ✅ **TypeScript Support**: Full type definitions included
+
+---
+
+## 📊 Benchmarks
+
+**ZON vs TOON vs JSON** (Token Efficiency)
+
+We benchmarked ZON against [TOON](https://github.com/toon-format/toon) and JSON using the **GPT-5 o200k_base tokenizer** across 7 different dataset types.
+
+**🏆 ZON won on ALL 7 datasets.**
+
+| Dataset Type | ZON Tokens | vs TOON | vs JSON (formatted) | vs JSON (compact) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Nested Structures** | **228** 👑 | -16.7% | -57.7% | -28.3% |
+| **Uniform Tabular** | **154** 👑 | -6.5% | -67.4% | -41.2% |
+| **Mixed Structures** | **125** 👑 | -8.8% | -62.8% | -38.7% |
+| **Deeply Nested** | **113** 👑 | -24.2% | -51.1% | -8.9% |
+| **Semi-uniform Logs** | **287** 👑 | -26.2% | -40.2% | -9.5% |
+
+> *Negative percentage means fewer tokens (better).*
+
+**Summary:**
+- **ZON is 13.8% more efficient than TOON** on average
+- **ZON is 56.9% more efficient than JSON** (formatted)
+- **ZON is 27.5% more efficient than JSON** (compact)
+
+[View full benchmark results](./benchmarks/RESULTS.md)
 
 ---
 
@@ -144,7 +171,7 @@ Encodes a JavaScript object or array into a ZON-formatted string.
 
 **Parameters:**
 - `data` (any): The input data to encode. Must be JSON-serializable (object, array, string, number, boolean, null).
-- `anchorInterval` (number, optional): Legacy parameter, defaults to 50. Not used in v1.0.2.
+- `anchorInterval` (number, optional): Legacy parameter, defaults to 50. Not used in v1.0.0.
 
 **Returns:**
 - `string`: The ZON-encoded string.
@@ -400,4 +427,4 @@ See [LICENSE](LICENSE) for full terms.
 
 **Made with ❤️ for the LLM community**
 
-*ZON v1.0.2 - Compression that scales with complexity*
+*ZON v1.0.0 - Compression that scales with complexity*

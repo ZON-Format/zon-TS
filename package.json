@@ -1,7 +1,7 @@
 {
   "name": "zon-format",
-  "version": "1.0.2",
-  "description": "Zero Overhead Notation v1.0.2 - Human-readable data format with 30%+ compression over JSON",
+  "version": "1.0.0",
+  "description": "Zero Overhead Notation v1.0.0 - Human-readable data format with 30%+ compression over JSON",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -37,8 +37,10 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@toon-format/toon": "^2.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "gpt-tokenizer": "^3.4.0",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"

@@ -1,5 +1,5 @@
 /**
- * ZON Encoder v1.0.2 - ClearText Format
+ * ZON Encoder v1.0.0 - ClearText Format
  *
  * This encoder produces clean, document-style output with YAML-like metadata
  * and CSV-like tables using @table syntax.
@@ -41,7 +41,7 @@ export class ZonEncoder {
   }
 
   /**
-   * Encode data to ZON v1.0.2 ClearText format.
+   * Encode data to ZON v1.0.0 ClearText format.
    */
   encode(data: any): string {
     // 1. Root Promotion: Separate metadata from stream
@@ -472,7 +472,7 @@ export class ZonEncoder {
 }
 
 /**
- * Convenience function to encode data to ZON v1.0.2 format.
+ * Convenience function to encode data to ZON v1.0.0 format.
  */
 export function encode(data: any, anchorInterval: number = DEFAULT_ANCHOR_INTERVAL): string {
   return new ZonEncoder(anchorInterval).encode(data);

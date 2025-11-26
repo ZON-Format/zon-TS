@@ -1,5 +1,5 @@
 /**
- * ZON Decoder v1.0.2 - ClearText Format
+ * ZON Decoder v1.0.0 - ClearText Format
  *
  * This decoder parses clean, document-style ZON with YAML-like metadata
  * and CSV-like tables using @table syntax.
@@ -18,7 +18,7 @@ interface TableInfo {
 
 export class ZonDecoder {
   /**
-   * Decode ZON v1.0.2 ClearText format to original data structure.
+   * Decode ZON v1.0.0 ClearText format to original data structure.
    */
   decode(zonStr: string): any {
     if (!zonStr) {
@@ -557,7 +557,7 @@ export class ZonDecoder {
 }
 
 /**
- * Convenience function to decode ZON v1.0.2 format to original data.
+ * Convenience function to decode ZON v1.0.0 format to original data.
  */
 export function decode(data: string): any {
   return new ZonDecoder().decode(data);

@@ -1,8 +1,8 @@
 /**
- * ZON Protocol Constants v1.0.2 (ClearText)
+ * ZON Protocol Constants v1.0.0 (ClearText)
  */
 
-export const VERSION = "1.0.2";
+export const VERSION = "1.0.0";
 
 // Format markers
 export const TABLE_MARKER = "@";          // @hikes(3): col1, col2

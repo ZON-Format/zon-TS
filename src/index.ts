@@ -1,5 +1,5 @@
 /**
- * ZON Format v1.0.2
+ * ZON Format v1.0.0
  * Zero Overhead Notation - A human-readable data serialization format
  * optimized for LLM token efficiency
  */
