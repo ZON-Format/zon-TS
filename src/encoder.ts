@@ -613,7 +613,6 @@ export class ZonEncoder {
 
     // CRITICAL FIX: Always JSON-stringify strings with newlines to prevent line breaks in ZON
     if (s.includes('\n') || s.includes('\r')) {
-      console.log(`[DEBUG] Detected newline in: ${JSON.stringify(s)}`);
       return this._csvQuote(JSON.stringify(s));
     }
 

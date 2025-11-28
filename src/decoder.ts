@@ -269,7 +269,7 @@ export class ZonDecoder {
    * Parse a table row with v2.0 sparse encoding support.
    */
   private _parseTableRow(line: string, table: TableInfo): Record<string, any> {
-    const tokens = this._parseCSVLine(line);
+    const tokens = this._splitByDelimiter(line, ',');
 
     // Strict mode: validate field count (before padding)
     const coreFieldCount = tokens.length;
@@ -359,51 +359,7 @@ export class ZonDecoder {
     return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(s) || /^\d{2}:\d{2}:\d{2}/.test(s);
   }
 
-  /**
-   * Simple CSV line parser
-   */
-  private _parseCSVLine(line: string): string[] {
-    const tokens: string[] = [];
-    let current = '';
-    let inQuote = false;
-    let i = 0;
 
-    while (i < line.length) {
-      const char = line[i];
-
-      if (char === '"') {
-        if (inQuote) {
-          // Check for escaped quote
-          if (i + 1 < line.length && line[i + 1] === '"') {
-            current += '"';
-            i += 2;
-            continue;
-          } else {
-            inQuote = false;
-            i++;
-            continue;
-          }
-        } else {
-          inQuote = true;
-          i++;
-          continue;
-        }
-      }
-
-      if (!inQuote && char === ',') {
-        tokens.push(current);
-        current = '';
-        i++;
-        continue;
-      }
-
-      current += char;
-      i++;
-    }
-
-    tokens.push(current);
-    return tokens;
-  }
 
   /**
    * Reconstruct table from parsed rows.
@@ -550,6 +506,7 @@ export class ZonDecoder {
       continue;
     }
 
+    // console.log(`[DEBUG] char: ${char}, depth: ${depth}, inQuote: ${inQuote}, delim: ${delim}`);
     if (['"', "'"].includes(char)) {
       if (!inQuote) {
         inQuote = true;
@@ -567,6 +524,7 @@ export class ZonDecoder {
         depth--;
         current.push(char);
       } else if (char === delim && depth === 0) {
+        // console.log(`[DEBUG] SPLIT at index ${i}`);
         parts.push(current.join(''));
         current.length = 0;
       } else {
