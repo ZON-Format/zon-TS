@@ -84,6 +84,7 @@ ZON addresses token bloat in JSON while maintaining structural fidelity. By decl
 3. **Human readable** - Debuggable, understandable format
 4. **LLM friendly** - Explicit markers aid comprehension
 5. **Deterministic** - Same input → same output
+6. **Deep Nesting** - Efficiently handles complex, recursive structures
 
 ### Use Cases
 

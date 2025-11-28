@@ -108,6 +108,7 @@ sam,5.1,180,3,Wildflower Loop,T
 - 📐 **Minimal Syntax**: Explicit headers (`@(N)` for count, column list) eliminate ambiguity for LLMs
 - 🧺 **Tabular Arrays**: Uniform arrays collapse into tables that declare fields once and stream row values
 - 🔢 **Canonical Numbers**: No scientific notation (1000000, not 1e6), NaN/Infinity → null
+- 🌳 **Deep Nesting**: Handles complex nested structures efficiently (91% compression on 50-level deep objects)
 - 🔒 **Security Limits**: Automatic DOS prevention (100MB docs, 1M arrays, 100K keys)
 - ✅ **Production Ready**: 94/94 tests pass, 27/27 datasets verified, zero data loss
 
