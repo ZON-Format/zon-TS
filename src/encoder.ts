@@ -518,6 +518,16 @@ export class ZonEncoder {
     // String handling - only quote if necessary
     const s = String(val);
 
+    // CRITICAL FIX: Always JSON-stringify strings with newlines to prevent line breaks in ZON
+    if (s.includes('\n') || s.includes('\r')) {
+      return JSON.stringify(s);
+    }
+
+    // Quote empty strings or whitespace-only strings to prevent them being parsed as null
+    if (!s.trim()) {
+      return JSON.stringify(s);
+    }
+
     // Quote strings that look like reserved words or numbers to prevent type confusion
     if (['T', 'F', 'null', 'true', 'false'].includes(s)) {
       return JSON.stringify(s);
@@ -592,16 +602,20 @@ export class ZonEncoder {
     }
 
     if (Array.isArray(val) || (typeof val === 'object' && val !== null)) {
-      // Use ZON-style formatting for complex types
-      const zonStr = this._formatZonNode(val);
-      if (this._needsQuotes(zonStr)) {
-        return this._csvQuote(zonStr);
-      }
-      return zonStr;
-    }
+    // Use ZON-style formatting for complex types
+    // ZON structures are self-delimiting ({}, []) and should NOT be quoted
+    // unless they are meant to be strings (which is handled by string path)
+    return this._formatZonNode(val);
+  }
 
     // String formatting with v1.0.3 optimizations
     const s = String(val);
+
+    // CRITICAL FIX: Always JSON-stringify strings with newlines to prevent line breaks in ZON
+    if (s.includes('\n') || s.includes('\r')) {
+      console.log(`[DEBUG] Detected newline in: ${JSON.stringify(s)}`);
+      return this._csvQuote(JSON.stringify(s));
+    }
 
     // OPTIMIZATION 1: ISO Date Detection
     // Dates like "2025-01-01" or "2025-01-01T10:00:00Z" are unambiguous

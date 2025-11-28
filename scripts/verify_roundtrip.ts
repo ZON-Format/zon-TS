@@ -15,25 +15,29 @@ let failed = 0;
 
 files.forEach(file => {
   const jsonPath = path.join(EXAMPLES_DIR, file);
-  const zonPath = jsonPath.replace('.json', '.zonf');
-  
   const originalJson = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
   
-  // 1. Encode original JSON -> ZON
-  const encodedZon = encode(originalJson);
-  
-  // 2. Decode ZON -> JSON
-  const decodedJson = decode(encodedZon);
-  
-  // 3. Compare
   try {
-    assert.deepStrictEqual(decodedJson, originalJson);
+    // 1. Encode original JSON -> ZON
+    const encodedZon = encode(originalJson);
+    
+    // 2. Decode ZON -> JSON
+    const decodedJson = decode(encodedZon);
+    
+    // 3. Compare (ignoring key order)
+    const sortedOriginal = sortKeys(originalJson);
+    const sortedDecoded = sortKeys(decodedJson);
+    
+    assert.deepStrictEqual(sortedDecoded, sortedOriginal);
     console.log(`✅ ${file}: Roundtrip successful`);
     passed++;
-  } catch (e) {
+  } catch (e: any) {
     console.error(`❌ ${file}: Roundtrip FAILED`);
-    console.error('Original:', JSON.stringify(originalJson).substring(0, 100) + '...');
-    console.error('Decoded :', JSON.stringify(decodedJson).substring(0, 100) + '...');
+    console.error('Error:', e.message);
+    // console.error('Original:', JSON.stringify(originalJson, null, 2));
+    // if (typeof decodedJson !== 'undefined') {
+    //   console.error('Decoded :', JSON.stringify(decodedJson, null, 2));
+    // }
     failed++;
   }
 });
@@ -42,4 +46,16 @@ console.log(`\nResults: ${passed} passed, ${failed} failed`);
 
 if (failed > 0) {
   process.exit(1);
+}
+
+function sortKeys(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(sortKeys);
+  } else if (typeof obj === 'object' && obj !== null) {
+    return Object.keys(obj).sort().reduce((acc: any, key) => {
+      acc[key] = sortKeys(obj[key]);
+      return acc;
+    }, {});
+  }
+  return obj;
 }

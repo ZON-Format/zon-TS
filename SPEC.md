@@ -414,9 +414,9 @@ Quote strings if they:
 1. **Contain structural chars:** `,`, `:`, `[`, `]`, `{`, `}`, `"`
 2. **Match literal keywords:** `T`, `F`, `true`, `false`, `null`, `none`, `nil`
 3. **Look like numbers:** `123`, `3.14`, `1e6`
-4. **Have whitespace:** Leading/trailing spaces, internal spaces
-5. **Are empty:** `""`
-6. **Contain escapes:** Newlines, tabs, quotes
+4. **Have whitespace:** Leading/trailing spaces, internal spaces (MUST quote to preserve)
+5. **Are empty:** `""` (MUST quote to distinguish from `null`)
+6. **Contain escapes:** Newlines, tabs, quotes (MUST quote to prevent structure breakage)
 
 **Examples:**
 ```zon

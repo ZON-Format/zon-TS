@@ -32,6 +32,20 @@ jobs:
     - name: Run unit tests
       run: npm test
 
+    - name: Generate examples
+      run: npm run generate:examples
+
+    - name: Verify examples generated
+      run: |
+        if [ ! -f "examples/10_dirty_data.zonf" ]; then
+          echo "Error: 10_dirty_data.zonf not generated"
+          exit 1
+        fi
+        if [ ! -f "examples/13_deep_recursion.zonf" ]; then
+          echo "Error: 13_deep_recursion.zonf not generated"
+          exit 1
+        fi
+
     - name: Verify roundtrip (examples)
       run: npx ts-node scripts/verify_roundtrip.ts
 

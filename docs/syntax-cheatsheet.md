@@ -139,7 +139,7 @@ tags:"[]"
    - `" padded "`
 
 4. **Empty string**:
-   - `""`
+   - `""` (MUST quote, otherwise parses as `null`)
 
 ### Safe Unquoted Strings
 

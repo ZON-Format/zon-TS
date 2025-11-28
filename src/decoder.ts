@@ -500,29 +500,35 @@ export class ZonDecoder {
     let quoteChar: string | null = null;
     let depth = 0;
 
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
 
-      if (['"', "'"].includes(char)) {
-        if (!inQuote) {
-          inQuote = true;
-          quoteChar = char;
-        } else if (char === quoteChar) {
-          inQuote = false;
-          quoteChar = null;
-        }
-      } else if (!inQuote) {
-        if (['{', '['].includes(char)) {
-          depth++;
-        } else if (['}', ']'].includes(char)) {
-          depth--;
-        } else if (char === delim && depth === 0) {
-          return i;
-        }
+    // Handle escaped characters
+    if (char === '\\' && i + 1 < text.length) {
+      i++; // Skip next char
+      continue;
+    }
+
+    if (['"', "'"].includes(char)) {
+      if (!inQuote) {
+        inQuote = true;
+        quoteChar = char;
+      } else if (char === quoteChar) {
+        inQuote = false;
+        quoteChar = null;
+      }
+    } else if (!inQuote) {
+      if (['{', '['].includes(char)) {
+        depth++;
+      } else if (['}', ']'].includes(char)) {
+        depth--;
+      } else if (char === delim && depth === 0) {
+        return i;
       }
     }
-    return -1;
   }
+  return -1;
+}
 
   /**
    * Split text by delimiter, respecting quotes and nesting.
@@ -534,40 +540,49 @@ export class ZonDecoder {
     let quoteChar: string | null = null;
     let depth = 0;
 
-    for (const char of text) {
-      if (['"', "'"].includes(char)) {
-        if (!inQuote) {
-          inQuote = true;
-          quoteChar = char;
-        } else if (char === quoteChar) {
-          inQuote = false;
-          quoteChar = null;
-        }
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    
+    // Handle escaped characters
+    if (char === '\\' && i + 1 < text.length) {
+      current.push(char);
+      current.push(text[++i]);
+      continue;
+    }
+
+    if (['"', "'"].includes(char)) {
+      if (!inQuote) {
+        inQuote = true;
+        quoteChar = char;
+      } else if (char === quoteChar) {
+        inQuote = false;
+        quoteChar = null;
+      }
+      current.push(char);
+    } else if (!inQuote) {
+      if (['{', '['].includes(char)) {
+        depth++;
         current.push(char);
-      } else if (!inQuote) {
-        if (['{', '['].includes(char)) {
-          depth++;
-          current.push(char);
-        } else if (['}', ']'].includes(char)) {
-          depth--;
-          current.push(char);
-        } else if (char === delim && depth === 0) {
-          parts.push(current.join(''));
-          current.length = 0;
-        } else {
-          current.push(char);
-        }
+      } else if (['}', ']'].includes(char)) {
+        depth--;
+        current.push(char);
+      } else if (char === delim && depth === 0) {
+        parts.push(current.join(''));
+        current.length = 0;
       } else {
         current.push(char);
       }
+    } else {
+      current.push(char);
     }
-
-    if (current.length > 0) {
-      parts.push(current.join(''));
-    }
-
-    return parts;
   }
+
+  if (current.length > 0) {
+    parts.push(current.join(''));
+  }
+
+  return parts;
+}
 
   /**
    * Parse a primitive value (T/F/null/number/string) without checking for ZON structure.
