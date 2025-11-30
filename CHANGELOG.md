@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.5] - 2025-11-30
+## [1.0.5] - 2025-11-30
 
 ### Added
 - **Colon-less Syntax:** Objects and arrays in nested positions now use `key{...}` and `key[...]` syntax, removing redundant colons.
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - **Rate Limiting**: Resolved 429 errors during benchmarking by implementing robust retry logic and concurrency control.
 
-## [2.0.4] - 2025-11-29
+## [1.0.4] - 2025-11-29
 
 ### Fixed
 - **Critical Data Integrity**: Fixed roundtrip failures for strings containing newlines, empty strings, and escaped characters.
