@@ -1,5 +1,4 @@
-metadata.generated:2025-01-01T12:00:00Z
-metadata.source:System A
+metadata{generated:2025-01-01T12:00:00Z,source:System A}
 
 items:@(2):id,value
 1,100

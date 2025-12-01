@@ -1,0 +1,82 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ZON",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#keys"
+    },
+    {
+      "include": "#table-headers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.zon",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.zon",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.zon",
+          "match": "\\\\."
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.zon",
+          "match": "\\b-?\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.zon",
+          "match": "\\b(true|false|T|F)\\b"
+        },
+        {
+          "name": "constant.language.null.zon",
+          "match": "\\b(null|nil|none)\\b"
+        }
+      ]
+    },
+    "keys": {
+      "patterns": [
+        {
+          "name": "entity.name.tag.zon",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\s*(?=:|\\{)"
+        }
+      ]
+    },
+    "table-headers": {
+      "patterns": [
+        {
+          "name": "entity.name.type.zon",
+          "match": "@\\([^)]+\\)"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.zon"
+}

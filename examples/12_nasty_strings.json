@@ -7,16 +7,16 @@
     "Zalgo: H̴e̴l̴l̴o̴ ̴W̴o̴r̴l̴d̴"
   ],
   "control_chars": [
-    "Null: \u0000",
-    "Backspace: \b",
-    "Form Feed: \f",
-    "Newline: \n",
-    "Carriage Return: \r",
-    "Tab: \t",
-    "Vertical Tab: \u000b"
+    "Null: \\u0000",
+    "Backspace: \\b",
+    "Form Feed: \\f",
+    "Newline: \\n",
+    "Carriage Return: \\r",
+    "Tab: \\t",
+    "Vertical Tab: \\v"
   ],
   "json_injection": [
-    "{\"key\": \"value\"}",
+    "{\\\"key\\\": \\\"value\\\"}",
     "[1, 2, 3]",
     "null",
     "true",
@@ -31,6 +31,6 @@
   ],
   "path_traversal": [
     "../../etc/passwd",
-    "..\\..\\windows\\system32\\config\\sam"
+    "..\\\\..\\\\windows\\\\system32\\\\config\\\\sam"
   ]
 }

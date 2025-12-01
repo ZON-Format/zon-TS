@@ -46,7 +46,7 @@ score:98.5
 
 ### Nested Objects
 
-**Colon-less Syntax (v2.0.5):**
+**Colon-less Syntax (v1.0.5):**
 ```zon
 # Colon is optional if value starts with { or [
 config{database{host:localhost,port:5432},cache{ttl:3600,enabled:T}}
@@ -166,6 +166,15 @@ users:@(2):id,name,active
 2,Bob,F
 ```
 
+### Delta Encoding (v1.0.5)
+
+```zon
+timeseries:@(3):ts:delta,val
+1000,10
++60,12
++60,15
+```
+
 **Best practice**: Always include count `@(N)` for explicit schema
 
 ---
@@ -250,7 +259,7 @@ path:"C:\\Users\\data"
 
 **ZON:**
 ```zon
-metadata{version:1.0.5,env:production}
+metadata{env:production,version:1.0.5}
 users:@(3):active,id,loginCount,name
 T,1,42,Alice
 T,2,17,Bob

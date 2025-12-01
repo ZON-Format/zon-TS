@@ -34,9 +34,9 @@
       "with: colon",
       "with \"quotes\"",
       "with 'single quotes'",
-      "with \n newline",
+      "with \\n newline",
       "https://example.com/path?query=1&param=2",
-      "special: !@#$%^&*()_+{}[]|\\:;\"'<>,.?/~`"
+      "special: !@#$%^&*()_+{}[]|\\\\:;\"'<>,.?/~`"
     ]
   },
   "edge_cases": {

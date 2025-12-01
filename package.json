@@ -7,6 +7,11 @@
   "bin": {
     "zon": "dist/cli.js"
   },
+  "browser": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./langchain": "./dist/langchain.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "jest",
@@ -42,14 +47,18 @@
   ],
   "devDependencies": {
     "@anthropic-ai/tokenizer": "^0.0.4",
+    "@langchain/core": "^1.1.0",
     "@toon-format/toon": "^2.0.0",
     "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/msgpack-lite": "^0.1.12",
     "@types/node": "^24.10.1",
     "fast-xml-parser": "^5.3.2",
     "gpt-tokenizer": "^3.4.0",
     "jest": "^30.2.0",
     "js-yaml": "^4.1.1",
     "llama-tokenizer-js": "^1.2.2",
+    "msgpack-lite": "^0.1.26",
     "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"
   },

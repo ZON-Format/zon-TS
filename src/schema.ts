@@ -30,6 +30,27 @@ export abstract class ZonSchema<T = any> {
   optional(): ZonSchema<T | undefined> {
     return new ZonOptional(this);
   }
+
+  nullable(): ZonSchema<T | null> {
+    return new ZonNullable(this);
+  }
+}
+
+class ZonNullable<T> extends ZonSchema<T | null> {
+  constructor(private schema: ZonSchema<T>) {
+    super();
+  }
+
+  parse(data: any, path: (string | number)[] = []): ZonResult<T | null> {
+    if (data === null) {
+      return { success: true, data: null };
+    }
+    return this.schema.parse(data, path);
+  }
+
+  toPrompt(indent: number = 0): string {
+    return `${this.schema.toPrompt(indent)} (nullable)`;
+  }
 }
 
 class ZonOptional<T> extends ZonSchema<T | undefined> {
@@ -50,6 +71,31 @@ class ZonOptional<T> extends ZonSchema<T | undefined> {
 }
 
 class ZonString extends ZonSchema<string> {
+  private minLength?: number;
+  private maxLength?: number;
+  private emailValidation = false;
+  private urlValidation = false;
+
+  min(length: number): this {
+    this.minLength = length;
+    return this;
+  }
+
+  max(length: number): this {
+    this.maxLength = length;
+    return this;
+  }
+
+  email(): this {
+    this.emailValidation = true;
+    return this;
+  }
+
+  url(): this {
+    this.urlValidation = true;
+    return this;
+  }
+
   parse(data: any, path: (string | number)[] = []): ZonResult<string> {
     if (typeof data !== 'string') {
       return {
@@ -58,16 +104,94 @@ class ZonString extends ZonSchema<string> {
         issues: [{ path, message: `Expected string, got ${typeof data}`, code: 'invalid_type' }],
       };
     }
+
+    // Length validation
+    if (this.minLength !== undefined && data.length < this.minLength) {
+      return {
+        success: false,
+        error: `String too short at ${path.join('.') || 'root'}: minimum ${this.minLength} characters`,
+        issues: [{ path, message: `String too short: minimum ${this.minLength} characters`, code: 'custom' }],
+      };
+    }
+
+    if (this.maxLength !== undefined && data.length > this.maxLength) {
+      return {
+        success: false,
+        error: `String too long at ${path.join('.') || 'root'}: maximum ${this.maxLength} characters`,
+        issues: [{ path, message: `String too long: maximum ${this.maxLength} characters`, code: 'custom' }],
+      };
+    }
+
+    // Email validation
+    if (this.emailValidation && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data)) {
+      return {
+        success: false,
+        error: `Invalid email at ${path.join('.') || 'root'}`,
+        issues: [{ path, message: 'Invalid email format', code: 'custom' }],
+      };
+    }
+
+    // URL validation
+    if (this.urlValidation) {
+      try {
+        new URL(data);
+      } catch {
+        return {
+          success: false,
+          error: `Invalid URL at ${path.join('.') || 'root'}`,
+          issues: [{ path, message: 'Invalid URL format', code: 'custom' }],
+        };
+      }
+    }
+
     return { success: true, data };
   }
 
   toPrompt(indent: number = 0): string {
+    const constraints: string[] = [];
+    if (this.minLength !== undefined) constraints.push(`min: ${this.minLength}`);
+    if (this.maxLength !== undefined) constraints.push(`max: ${this.maxLength}`);
+    if (this.emailValidation) constraints.push('email');
+    if (this.urlValidation) constraints.push('url');
+    
+    const constraintStr = constraints.length > 0 ? ` (${constraints.join(', ')})` : '';
     const desc = this.description ? ` - ${this.description}` : '';
-    return `string${desc}`;
+    return `string${constraintStr}${desc}`;
   }
 }
 
 class ZonNumber extends ZonSchema<number> {
+  private minValue?: number;
+  private maxValue?: number;
+  private isPositive = false;
+  private isNegative = false;
+  private isInteger = false;
+
+  min(value: number): this {
+    this.minValue = value;
+    return this;
+  }
+
+  max(value: number): this {
+    this.maxValue = value;
+    return this;
+  }
+
+  positive(): this {
+    this.isPositive = true;
+    return this;
+  }
+
+  negative(): this {
+    this.isNegative = true;
+    return this;
+  }
+
+  int(): this {
+    this.isInteger = true;
+    return this;
+  }
+
   parse(data: any, path: (string | number)[] = []): ZonResult<number> {
     if (typeof data !== 'number' || isNaN(data)) {
       return {
@@ -76,14 +200,67 @@ class ZonNumber extends ZonSchema<number> {
         issues: [{ path, message: `Expected number, got ${typeof data}`, code: 'invalid_type' }],
       };
     }
+
+    // Integer validation
+    if (this.isInteger && !Number.isInteger(data)) {
+      return {
+        success: false,
+        error: `Expected integer at ${path.join('.') || 'root'}, got ${data}`,
+        issues: [{ path, message: `Expected integer, got ${data}`, code: 'custom' }],
+      };
+    }
+
+    // Positive/negative validation
+    if (this.isPositive && data <= 0) {
+      return {
+        success: false,
+        error: `Expected positive number at ${path.join('.') || 'root'}, got ${data}`,
+        issues: [{ path, message: `Expected positive number, got ${data}`, code: 'custom' }],
+      };
+    }
+
+    if (this.isNegative && data >= 0) {
+      return {
+        success: false,
+        error: `Expected negative number at ${path.join('.') || 'root'}, got ${data}`,
+        issues: [{ path, message: `Expected negative number, got ${data}`, code: 'custom' }],
+      };
+    }
+
+    // Min/max validation
+    if (this.minValue !== undefined && data < this.minValue) {
+      return {
+        success: false,
+        error: `Number too small at ${path.join('.') || 'root'}: minimum ${this.minValue}`,
+        issues: [{ path, message: `Number too small: minimum ${this.minValue}`, code: 'custom' }],
+      };
+    }
+
+    if (this.maxValue !== undefined && data > this.maxValue) {
+      return {
+        success: false,
+        error: `Number too large at ${path.join('.') || 'root'}: maximum ${this.maxValue}`,
+        issues: [{ path, message: `Number too large: maximum ${this.maxValue}`, code: 'custom' }],
+      };
+    }
+
     return { success: true, data };
   }
 
   toPrompt(indent: number = 0): string {
+    const constraints: string[] = [];
+    if (this.isInteger) constraints.push('integer');
+    if (this.isPositive) constraints.push('positive');
+    if (this.isNegative) constraints.push('negative');
+    if (this.minValue !== undefined) constraints.push(`min: ${this.minValue}`);
+    if (this.maxValue !== undefined) constraints.push(`max: ${this.maxValue}`);
+    
+    const constraintStr = constraints.length > 0 ? ` (${constraints.join(', ')})` : '';
     const desc = this.description ? ` - ${this.description}` : '';
-    return `number${desc}`;
+    return `number${constraintStr}${desc}`;
   }
 }
+
 
 class ZonBoolean extends ZonSchema<boolean> {
   parse(data: any, path: (string | number)[] = []): ZonResult<boolean> {
@@ -126,8 +303,21 @@ class ZonEnum<T extends string> extends ZonSchema<T> {
 }
 
 class ZonArray<T> extends ZonSchema<T[]> {
+  private minLength?: number;
+  private maxLength?: number;
+
   constructor(private elementSchema: ZonSchema<T>) {
     super();
+  }
+
+  min(length: number): this {
+    this.minLength = length;
+    return this;
+  }
+
+  max(length: number): this {
+    this.maxLength = length;
+    return this;
   }
 
   parse(data: any, path: (string | number)[] = []): ZonResult<T[]> {
@@ -136,6 +326,23 @@ class ZonArray<T> extends ZonSchema<T[]> {
         success: false,
         error: `Expected array at ${path.join('.') || 'root'}, got ${typeof data}`,
         issues: [{ path, message: `Expected array, got ${typeof data}`, code: 'invalid_type' }],
+      };
+    }
+
+    // Length validation
+    if (this.minLength !== undefined && data.length < this.minLength) {
+      return {
+        success: false,
+        error: `Array too short at ${path.join('.') || 'root'}: minimum ${this.minLength} items`,
+        issues: [{ path, message: `Array too short: minimum ${this.minLength} items`, code: 'custom' }],
+      };
+    }
+
+    if (this.maxLength !== undefined && data.length > this.maxLength) {
+      return {
+        success: false,
+        error: `Array too long at ${path.join('.') || 'root'}: maximum ${this.maxLength} items`,
+        issues: [{ path, message: `Array too long: maximum ${this.maxLength} items`, code: 'custom' }],
       };
     }
 
@@ -152,8 +359,13 @@ class ZonArray<T> extends ZonSchema<T[]> {
   }
 
   toPrompt(indent: number = 0): string {
+    const constraints: string[] = [];
+    if (this.minLength !== undefined) constraints.push(`min: ${this.minLength}`);
+    if (this.maxLength !== undefined) constraints.push(`max: ${this.maxLength}`);
+    
+    const constraintStr = constraints.length > 0 ? ` (${constraints.join(', ')})` : '';
     const desc = this.description ? ` - ${this.description}` : '';
-    return `array of [${this.elementSchema.toPrompt(indent)}]${desc}`;
+    return `array of [${this.elementSchema.toPrompt(indent)}]${constraintStr}${desc}`;
   }
 }
 

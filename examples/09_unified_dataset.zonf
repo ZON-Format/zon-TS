@@ -1,16 +1,13 @@
-config.cache{enabled:T,provider:redis,ttl:3600,nodes[redis-1,redis-2,redis-3]}
-config.database{host:db-primary.internal,port:5432,poolSize:50,timeout:30000,replicas[{host:db-read-1.internal,priority:10},{host:db-read-2.internal,priority:5}]}
-config.features{darkMode:T,betaAccess:F,analytics{enabled:T,sampleRate:0.5}}
-logs[{id:101,timestamp:2025-02-01T10:00:00Z,level:INFO,message:System startup,source:kernel},{id:102,timestamp:2025-02-01T10:00:05Z,level:INFO,message:Database connected,source:db-pool,latency:12},{id:103,timestamp:2025-02-01T10:01:20Z,level:WARN,message:High memory usage,source:monitor,usage:85},{id:104,timestamp:2025-02-01T10:05:00Z,level:ERROR,message:Connection timeout,source:api-gateway,requestId:req-abc-123},{id:105,timestamp:2025-02-01T10:10:00Z,level:INFO,message:Scheduled backup started,source:backup-service},{id:106,timestamp:2025-02-01T10:15:00Z,level:INFO,message:Scheduled backup completed,source:backup-service,duration:300}]
-metadata.location:us-east-1
-metadata.systemId:SYS-CORE-001
-metadata.tags[production,critical,web-cluster]
-metadata.uptime:1245600
-metadata.version:"2.5.0"
+config{cache{enabled:T,nodes[redis-1,redis-2,redis-3],provider:redis,ttl:3600},database{host:db-primary.internal,poolSize:50,port:5432,replicas[{host:db-read-1.internal,priority:10},{host:db-read-2.internal,priority:5}],timeout:30000},features{analytics{enabled:T,sampleRate:0.5},betaAccess:F,darkMode:T}}
+feed[{author:tech_guru,content:ZON is the future of data serialization!,id:f1,likes:120,shares:45,type:post},{author:dev_jane,content:"Totally agree, the token savings are insane.",id:f2,likes:30,replyTo:f1,type:comment},{clickCount:500,content:Deploy your ZON apps instantly.,id:f3,sponsor:CloudCorp,type:ad}]
+metadata{location:us-east-1,systemId:SYS-CORE-001,tags[production,critical,web-cluster],uptime:1245600,version:2.5.0}
+products[{category:Electronics,id:p1,inStock:T,name:Wireless Headphones,price:99.99,tags[audio,bluetooth,sale]},{category:Furniture,id:p2,inStock:F,name:Ergonomic Chair,price:249.5,tags[office,comfort]},{category:Electronics,id:p3,inStock:T,name:Gaming Mouse,price:59.99,tags[gaming,rgb]}]
+users[{active:T,id:1,lastLogin:2025-02-01T08:30:00Z,loginCount:154,name:Alice Admin,role:admin},{active:T,id:2,lastLogin:2025-02-01T09:15:00Z,loginCount:89,name:Bob Builder,role:dev},{active:F,id:3,lastLogin:2025-01-28T14:20:00Z,loginCount:42,name:Charlie Check,role:qa},{active:T,id:4,lastLogin:2025-02-01T07:45:00Z,loginCount:210,name:Dave Deploy,role:ops},{active:T,id:5,lastLogin:2025-02-01T10:00:00Z,loginCount:5,name:Eve External,role:guest}]
 
-users:@(5):active,id,lastLogin,loginCount,name,role
-T,1,2025-02-01T08:30:00Z,154,Alice Admin,admin
-T,2,2025-02-01T09:15:00Z,89,Bob Builder,dev
-F,3,2025-01-28T14:20:00Z,42,Charlie Check,qa
-T,4,2025-02-01T07:45:00Z,210,Dave Deploy,ops
-T,5,2025-02-01T10:00:00Z,5,Eve External,guest
+logs:@(6):id:delta,level,message,source,timestamp
+101,INFO,System startup,kernel,2025-02-01T10:00:00Z
++1,INFO,Database connected,db-pool,2025-02-01T10:00:05Z,latency:12
++1,WARN,High memory usage,monitor,2025-02-01T10:01:20Z,usage:85
++1,ERROR,Connection timeout,api-gateway,2025-02-01T10:05:00Z,requestId:req-abc-123
++1,INFO,Scheduled backup started,backup-service,2025-02-01T10:10:00Z
++1,INFO,Scheduled backup completed,backup-service,2025-02-01T10:15:00Z,duration:300

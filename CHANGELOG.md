@@ -5,32 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.5] - 2025-11-30
+## [1.0.5] - 2025-12-01
 
 ### Added
-- **Colon-less Syntax:** Objects and arrays in nested positions now use `key{...}` and `key[...]` syntax, removing redundant colons.
-- **Smart Flattening:** Top-level nested objects are automatically flattened to dot notation (e.g., `config.db{...}`).
-- **Control Character Escaping:** All control characters (ASCII 0-31) are now properly escaped to prevent binary file creation.
-
-### Improved
-- **Token Efficiency:** Achieved up to 23.8% reduction vs JSON (GPT-4o) thanks to syntax optimizations.
-- **Readability:** Cleaner, block-like structure for nested data.
-
-## [1.0.5] - 2025-11-30
-
-### Added
-- **Algorithmic Benchmark Generation**: Replaced LLM-based question generation with a deterministic algorithm for consistent, reproducible benchmarks.
-- **Expanded Dataset**: Added "products" and "feed" data to the unified dataset to simulate real-world e-commerce scenarios.
-- **Tricky Questions**: Introduced edge cases (non-existent fields, logic traps, case sensitivity) to stress-test LLM reasoning.
-- **Robust Benchmark Runner**: Added exponential backoff and rate limiting to handle Azure OpenAI S0 tier constraints.
+- **Delta Encoding**: Sequential numeric columns in tables are delta-encoded (`:delta`) for maximum compression.
+- **Hierarchical Sparse Encoding**: Nested objects in tables are flattened using dot notation for sparse columns.
+- **Metadata Optimization**: `_writeMetadata` now uses grouped object syntax (`key{...}`) instead of flattening, reducing redundancy.
+- **LLM Optimization**: New `encodeLLM` function optimizes field ordering for specific LLM tasks (retrieval vs. generation).
+- **Type Coercion**: Optional `enableTypeCoercion` in decoder to handle loose types (e.g., "true" -> true).
+- **Algorithmic Benchmark Generation**: Replaced LLM-based question generation with a deterministic algorithm.
+- **Expanded Dataset**: Added "products" and "feed" data to the unified dataset.
 
 ### Changed
-- **Benchmark Formats**: Refined tested formats to ZON, TOON, JSON, JSON (Minified), and CSV for focused analysis.
-- **Documentation**: Updated README and API references with the latest benchmark results (GPT-5 Nano) and accurate token counts.
-- **Token Efficiency**: Recalculated efficiency scores based on the expanded dataset, confirming ZON's leadership (1430.6 score).
+- **Benchmark Formats**: Refined tested formats to ZON, TOON, JSON, JSON (Minified), and CSV.
+- **Documentation**: Updated all docs to reflect v1.0.5 features.
 
 ### Fixed
-- **Rate Limiting**: Resolved 429 errors during benchmarking by implementing robust retry logic and concurrency control.
+- **Double Quoting Bug**: Fixed an issue where `_formatValue` was triple-quoting strings that resembled numbers.
+- **Rate Limiting**: Resolved 429 errors during benchmarking.
 
 ## [1.0.4] - 2025-11-29
 

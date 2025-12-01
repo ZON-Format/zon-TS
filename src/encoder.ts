@@ -5,6 +5,8 @@ import {
   LIQUID_TOKEN,
   DEFAULT_ANCHOR_INTERVAL
 } from './constants';
+import { SparseMode } from './types';
+import { TypeInferrer } from './type-inference';
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
 interface JsonObject { [key: string]: JsonValue }
@@ -31,9 +33,20 @@ export class ZonEncoder {
   private anchor_interval: number;
   private safe_str_re: RegExp;
 
-  constructor(anchorInterval: number = DEFAULT_ANCHOR_INTERVAL) {
+  private enableDictionaryCompression: boolean;
+  private enableTypeCoercion: boolean;
+  private typeInferrer: TypeInferrer;
+
+  constructor(
+    anchorInterval: number = DEFAULT_ANCHOR_INTERVAL, 
+    enableDictCompression: boolean = true,
+    enableTypeCoercion: boolean = false
+  ) {
     this.anchor_interval = anchorInterval;
     this.safe_str_re = /^[a-zA-Z0-9_\-\.]+$/;
+    this.enableDictionaryCompression = enableDictCompression;
+    this.enableTypeCoercion = enableTypeCoercion;
+    this.typeInferrer = new TypeInferrer();
   }
 
   /**
@@ -145,21 +158,73 @@ export class ZonEncoder {
    */
   private _writeMetadata(metadata: Record<string, any>): string[] {
     const lines: string[] = [];
-    const flattened = this._flatten(metadata, '', '.', 1);
-
-    const sortedKeys = Object.keys(flattened).sort();
+    // Do not flatten. Iterate top-level keys.
+    const sortedKeys = Object.keys(metadata).sort();
+    
     for (const key of sortedKeys) {
-      const val = flattened[key];
-      const valStr = this._formatValue(val);
+      const val = metadata[key];
       
-      if (valStr.startsWith('{') || valStr.startsWith('[')) {
-        lines.push(`${key}${valStr}`);
+      if (typeof val === 'object' && val !== null) {
+        // Use recursive formatter for objects/arrays
+        const valStr = this._formatZonNode(val);
+        if (valStr.startsWith('{') || valStr.startsWith('[')) {
+          lines.push(`${key}${valStr}`);
+        } else {
+          // Should not happen for objects, but safety fallback
+          lines.push(`${key}${META_SEPARATOR}${valStr}`);
+        }
       } else {
+        // Primitive
+        const valStr = this._formatValue(val);
         lines.push(`${key}${META_SEPARATOR}${valStr}`);
       }
     }
 
     return lines;
+  }
+
+
+
+  private _analyzeOptimalSparseMode(values: any[]): SparseMode {
+    if (values.length < 5) return SparseMode.NONE;
+
+    // Check for delta encoding (sequential numbers)
+    let isDelta = true;
+    let isNumeric = true;
+    
+    for (let i = 0; i < values.length; i++) {
+      const val = values[i];
+      if (typeof val !== 'number') {
+        isNumeric = false;
+        break;
+      }
+    }
+
+    if (isNumeric) {
+      // Check if delta is efficient (small diffs)
+      // Simple heuristic: if diffs are mostly small integers
+      // For now, just enable for all numeric columns to test mechanism
+      return SparseMode.DELTA;
+    }
+
+    return SparseMode.NONE;
+  }
+
+  private _encodeDeltaColumn(values: number[]): string {
+    if (values.length === 0) return '';
+    
+    const deltas: string[] = [String(values[0])];
+    for (let i = 1; i < values.length; i++) {
+      const delta = values[i] - values[i - 1];
+      // Use + for positive diffs to distinguish from absolute values if we mixed them
+      // But for pure delta column, we can just use the number. 
+      // However, ZON spec says delta values should be explicit.
+      // Let's use signed integers: +1, -5, 0.
+      // 0 is just 0.
+      deltas.push(delta >= 0 ? `+${delta}` : String(delta));
+    }
+    
+    return deltas.join('');
   }
 
   /**
@@ -175,23 +240,144 @@ export class ZonEncoder {
     }
 
     const lines: string[] = [];
-    const flatStream = stream.map(row => this._flatten(row));
+    // Enable deep flattening for Hierarchical Sparse Encoding
+    const flatStream = stream.map(row => this._flatten(row, '', '.', 5));
 
     const allKeysSet = new Set<string>();
     flatStream.forEach(d => Object.keys(d).forEach(k => allKeysSet.add(k)));
     let cols = Array.from(allKeysSet).sort();
 
+    // Type Coercion
+    if (this.enableTypeCoercion) {
+      for (const col of cols) {
+        const values = flatStream.map(row => row[col]);
+        const inferred = this.typeInferrer.inferColumnType(values);
+        
+        if (inferred.coercible) {
+          // Coerce all values in this column
+          for (const row of flatStream) {
+            if (col in row && row[col] !== undefined && row[col] !== null) {
+              row[col] = this.typeInferrer.coerce(row[col], inferred);
+            }
+          }
+        }
+      }
+    }
+
+    const dictionaries = this.enableDictionaryCompression ? this._detectDictionaries(flatStream, cols) : new Map();
+
+    if (dictionaries.size > 0) {
+      return this._writeDictionaryTable(flatStream, cols, dictionaries, stream.length, key);
+    }
+
     const columnStats = this._analyzeColumnSparsity(flatStream, cols);
     const coreColumns = columnStats.filter(c => c.presence >= 0.7).map(c => c.name);
     const optionalColumns = columnStats.filter(c => c.presence < 0.7).map(c => c.name);
 
-    const useSparseEncoding = optionalColumns.length > 0 && optionalColumns.length <= 5;
+    // Check for Delta Encoding
+    const deltaColumns: string[] = [];
+    const regularCoreColumns: string[] = [];
+    
+    for (const col of coreColumns) {
+      const values = flatStream.map(row => row[col]);
+      const mode = this._analyzeOptimalSparseMode(values);
+      if (mode === SparseMode.DELTA) {
+        deltaColumns.push(col);
+      } else {
+        regularCoreColumns.push(col);
+      }
+    }
+
+    if (deltaColumns.length > 0) {
+      return this._writeDeltaTable(flatStream, regularCoreColumns, deltaColumns, optionalColumns, stream.length, key);
+    }
+
+    // Relaxed threshold for sparse encoding to support hierarchical data
+    // If we have many sparse columns (e.g. from nested fields), sparse encoding is usually better
+    const useSparseEncoding = optionalColumns.length > 0;
 
     if (useSparseEncoding) {
       return this._writeSparseTable(flatStream, coreColumns, optionalColumns, stream.length, key);
     } else {
       return this._writeStandardTable(flatStream, cols, stream.length, key);
     }
+  }
+
+  private _writeDeltaTable(
+    flatStream: Record<string, any>[],
+    regularCols: string[],
+    deltaCols: string[],
+    optionalCols: string[],
+    rowCount: number,
+    key: string
+  ): string[] {
+    const lines: string[] = [];
+    
+    let header = '';
+    if (key && key !== 'data') {
+      header = `${key}${META_SEPARATOR}${TABLE_MARKER}(${rowCount})`;
+    } else {
+      header = `${TABLE_MARKER}${rowCount}`;
+    }
+
+    // Delta columns syntax: col:delta
+    const deltaDefs = deltaCols.map(c => `${c}:delta`);
+    const allCols = [...deltaDefs, ...regularCols];
+    
+    header += `${META_SEPARATOR}${allCols.join(',')}`;
+    lines.push(header);
+
+    // Pre-calculate deltas
+    const deltaValuesMap = new Map<string, string>();
+    for (const col of deltaCols) {
+      const values = flatStream.map(row => row[col]);
+      deltaValuesMap.set(col, this._encodeDeltaColumn(values));
+    }
+
+    // Write delta values first (as a single block per column? No, ZON is row-based usually)
+    // Wait, ZON row-based delta would be: 1000,+1,+1...
+    // But if we mix with other columns, it gets messy.
+    // Let's stick to row-based:
+    // row 1: 1000, Alice
+    // row 2: +1, Bob
+    // row 3: +1, Charlie
+    
+    for (let i = 0; i < rowCount; i++) {
+      const row = flatStream[i];
+      const tokens: string[] = [];
+
+      for (const col of deltaCols) {
+        const val = row[col];
+        if (i === 0) {
+          tokens.push(String(val));
+        } else {
+          const prev = flatStream[i-1][col];
+          const diff = val - prev;
+          tokens.push(diff >= 0 ? `+${diff}` : String(diff));
+        }
+      }
+
+      for (const col of regularCols) {
+        const val = row[col];
+        if (val === undefined || val === null) {
+          tokens.push('null');
+        } else {
+          tokens.push(this._formatValue(val));
+        }
+      }
+
+      // Optional columns (sparse)
+      for (const col of optionalCols) {
+        if (col in row && row[col] !== undefined) {
+          const val = this._formatValue(row[col]);
+          tokens.push(`${col}:${val}`);
+        }
+      }
+
+      lines.push(tokens.join(','));
+    }
+
+    return lines;
   }
 
   /**
@@ -322,6 +508,91 @@ export class ZonEncoder {
    */
   private _analyzeSequentialColumns(data: Record<string, any>[], cols: string[]): string[] {
     return [];
+  }
+
+  private _detectDictionaries(data: Record<string, any>[], cols: string[]): Map<string, string[]> {
+    const dictionaries = new Map<string, string[]>();
+
+    for (const col of cols) {
+      const values = data.map(row => row[col]).filter(v => typeof v === 'string');
+      if (values.length < data.length * 0.8) continue;
+
+      const uniqueValues = Array.from(new Set(values));
+      const repetitionRate = 1 - (uniqueValues.length / values.length);
+      const avgLength = uniqueValues.reduce((sum, v) => sum + v.length, 0) / uniqueValues.length;
+
+      const currentTokens = values.length * avgLength;
+      // More accurate reference cost: 1 char for <10, 2 for <100
+      const refCost = uniqueValues.length < 10 ? 1 : (uniqueValues.length < 100 ? 2 : 3);
+      
+      // Overhead: col[N]:val,val...
+      // col name + [ + N + ]: + values + commas
+      const valuesLength = uniqueValues.reduce((sum, v) => sum + v.length, 0);
+      const definitionOverhead = col.length + 4 + valuesLength + (uniqueValues.length - 1);
+      
+      const dictTokens = valuesLength + (values.length * refCost) + definitionOverhead;
+      const savings = (currentTokens - dictTokens) / currentTokens;
+
+      // Lower threshold slightly for small datasets if repetition is high
+      const threshold = values.length < 20 ? 0.1 : 0.2;
+
+      if (savings > threshold && uniqueValues.length < values.length / 2 && uniqueValues.length <= 50) {
+        dictionaries.set(col, uniqueValues.sort());
+      }
+    }
+
+    return dictionaries;
+  }
+
+  private _writeDictionaryTable(
+    flatStream: Record<string, any>[],
+    cols: string[],
+    dictionaries: Map<string, string[]>,
+    rowCount: number,
+    key: string
+  ): string[] {
+    const lines: string[] = [];
+
+    for (const [col, values] of dictionaries) {
+      lines.push(`${col}[${values.length}]:${values.join(',')}`);
+    }
+
+    const dictCols = Array.from(dictionaries.keys());
+    const regularCols = cols.filter(c => !dictionaries.has(c));
+    const allCols = [...dictCols, ...regularCols];
+
+    let header = '';
+    if (key && key !== 'data') {
+      header = `${key}${META_SEPARATOR}${TABLE_MARKER}(${rowCount})`;
+    } else {
+      header = `${TABLE_MARKER}${rowCount}`;
+    }
+    header += `${META_SEPARATOR}${allCols.join(',')}`;
+    lines.push(header);
+
+    for (const row of flatStream) {
+      const tokens: string[] = [];
+
+      for (const col of dictCols) {
+        const value = row[col];
+        const dict = dictionaries.get(col)!;
+        const index = dict.indexOf(value);
+        tokens.push(String(index));
+      }
+
+      for (const col of regularCols) {
+        const val = row[col];
+        if (val === undefined || val === null) {
+          tokens.push('null');
+        } else {
+          tokens.push(this._formatValue(val));
+        }
+      }
+
+      lines.push(tokens.join(','));
+    }
+
+    return lines;
   }
 
   /**
@@ -535,7 +806,7 @@ export class ZonEncoder {
    * @returns Formatted string
    */
   private _formatValue(val: any): string {
-    if (val === null) {
+    if (val === null || val === undefined) {
       return "null";
     }
     if (val === true) {
@@ -583,25 +854,39 @@ export class ZonEncoder {
 
     const s = String(val);
 
-    if (s.includes('\n') || s.includes('\r')) {
-      return this._csvQuote(JSON.stringify(s));
-    }
+
 
     if (this._isISODate(s)) {
       return s;
     }
 
+
+
     const needsTypeProtection = this._needsTypeProtection(s);
 
     if (needsTypeProtection) {
-      return this._csvQuote(JSON.stringify(s));
+      return this._zonQuote(s);
     }
 
     if (this._needsQuotes(s)) {
-      return this._csvQuote(s);
+      return this._zonQuote(s);
     }
 
     return s;
+  }
+
+  /**
+   * Quotes a string using ZON rules (CSV-style quotes + JSON-style control chars).
+   */
+  private _zonQuote(s: string): string {
+    // Use JSON.stringify to handle control characters (\n, \t, etc.) and backslashes
+    const json = JSON.stringify(s);
+    // Strip outer quotes
+    const inner = json.slice(1, -1);
+    // Convert JSON escaped quotes (\") to CSV escaped quotes ("")
+    // Note: JSON.stringify escapes " as \", so we look for \"
+    const zon = inner.replace(/\\"/g, '""');
+    return `"${zon}"`;
   }
 
   /**
@@ -760,6 +1045,58 @@ export class ZonEncoder {
  * @param anchorInterval - Anchor interval for encoding
  * @returns ZON formatted string
  */
-export function encode(data: any, anchorInterval: number = DEFAULT_ANCHOR_INTERVAL): string {
-  return new ZonEncoder(anchorInterval).encode(data);
+export function encode(data: any, anchorInterval: number = DEFAULT_ANCHOR_INTERVAL, options: { typeCoercion?: boolean } = {}): string {
+  return new ZonEncoder(anchorInterval, true, options.typeCoercion).encode(data);
+}
+
+import { LLMOptimizer } from './llm-optimizer';
+
+export interface LLMContext {
+  model?: 'gpt-4' | 'claude' | 'gemini' | 'llama';
+  task: 'retrieval' | 'generation' | 'analysis';
+  contextWindow?: number;
+}
+
+/**
+ * Encodes data optimized for LLM consumption.
+ * 
+ * @param data - Data to encode
+ * @param context - LLM context and task
+ * @returns Optimized ZON string
+ */
+export function encodeLLM(data: any, context: LLMContext): string {
+  let processedData = data;
+
+  // Optimize field order for generation/analysis tasks
+  if (context.task === 'generation' || context.task === 'analysis') {
+    const optimizer = new LLMOptimizer();
+    if (Array.isArray(data)) {
+      processedData = optimizer.optimizeFieldOrder(data);
+    } else if (typeof data === 'object' && data !== null) {
+      // Try to optimize values if they are arrays
+      const newData: any = { ...data };
+      for (const key of Object.keys(newData)) {
+        if (Array.isArray(newData[key])) {
+          newData[key] = optimizer.optimizeFieldOrder(newData[key]);
+        }
+      }
+      processedData = newData;
+    }
+  }
+
+  // Configure encoder based on task
+  let enableDict = true;
+  let enableTypeCoercion = true; // Usually good for LLMs to have clean types
+
+  if (context.task === 'retrieval') {
+    // For retrieval, we might want less compression to keep terms explicit?
+    // Actually, ZON's dictionary compression is still readable enough and saves tokens.
+    // But maybe disable it if we want exact string matching on raw text?
+    // Let's keep it enabled as ZON's strength is density.
+    // But maybe type coercion is critical here.
+    enableTypeCoercion = true;
+  }
+
+  const encoder = new ZonEncoder(DEFAULT_ANCHOR_INTERVAL, enableDict, enableTypeCoercion);
+  return encoder.encode(processedData);
 }

@@ -135,5 +135,66 @@
       "source": "backup-service",
       "duration": 300
     }
+  ],
+  "products": [
+    {
+      "id": "p1",
+      "name": "Wireless Headphones",
+      "price": 99.99,
+      "category": "Electronics",
+      "inStock": true,
+      "tags": [
+        "audio",
+        "bluetooth",
+        "sale"
+      ]
+    },
+    {
+      "id": "p2",
+      "name": "Ergonomic Chair",
+      "price": 249.5,
+      "category": "Furniture",
+      "inStock": false,
+      "tags": [
+        "office",
+        "comfort"
+      ]
+    },
+    {
+      "id": "p3",
+      "name": "Gaming Mouse",
+      "price": 59.99,
+      "category": "Electronics",
+      "inStock": true,
+      "tags": [
+        "gaming",
+        "rgb"
+      ]
+    }
+  ],
+  "feed": [
+    {
+      "id": "f1",
+      "type": "post",
+      "author": "tech_guru",
+      "content": "ZON is the future of data serialization!",
+      "likes": 120,
+      "shares": 45
+    },
+    {
+      "id": "f2",
+      "type": "comment",
+      "author": "dev_jane",
+      "content": "Totally agree, the token savings are insane.",
+      "likes": 30,
+      "replyTo": "f1"
+    },
+    {
+      "id": "f3",
+      "type": "ad",
+      "sponsor": "CloudCorp",
+      "content": "Deploy your ZON apps instantly.",
+      "clickCount": 500
+    }
   ]
 }

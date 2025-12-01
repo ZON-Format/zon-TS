@@ -12,6 +12,8 @@ interface TableInfo {
   prev_vals: Record<string, any>;
   row_index: number;
   expected_rows: number;
+  dictionaries?: Map<string, string[]>;
+  deltaCols?: Set<string>;
 }
 
 export class ZonDecoder {
@@ -69,6 +71,7 @@ export class ZonDecoder {
     const tables: Record<string, TableInfo> = {};
     let currentTable: TableInfo | null = null;
     let currentTableName: string | null = null;
+    let pendingDictionaries = new Map<string, string[]>();
 
     for (const line of lines) {
       const trimmedLine = line.trimEnd();
@@ -86,9 +89,23 @@ export class ZonDecoder {
         continue;
       }
 
+      // Dictionary definition: col[count]:val,val
+      const dictMatch = trimmedLine.match(/^(\w+)\[(\d+)\]:(.+)$/);
+      if (dictMatch && !trimmedLine.startsWith(TABLE_MARKER)) {
+        const [, col, , vals] = dictMatch;
+        pendingDictionaries.set(col, vals.split(','));
+        continue;
+      }
+
       // Table header (Anonymous or Legacy): @...
       if (trimmedLine.startsWith(TABLE_MARKER)) {
         const [tableName, tableInfo] = this._parseTableHeader(trimmedLine);
+        
+        if (pendingDictionaries.size > 0) {
+          tableInfo.dictionaries = new Map(pendingDictionaries);
+          pendingDictionaries.clear();
+        }
+
         currentTableName = tableName;
         currentTable = tableInfo;
         tables[currentTableName] = currentTable;
@@ -221,7 +238,19 @@ export class ZonDecoder {
         }
       }
 
-      const cols = colsStr.split(',').map(c => c.trim());
+      const rawCols = colsStr.split(',').map(c => c.trim());
+      const cols: string[] = [];
+      const deltaCols = new Set<string>();
+
+      for (const rawCol of rawCols) {
+        if (rawCol.endsWith(':delta')) {
+          const colName = rawCol.substring(0, rawCol.length - 6);
+          cols.push(colName);
+          deltaCols.add(colName);
+        } else {
+          cols.push(rawCol);
+        }
+      }
 
       return [tableName, {
         cols,
@@ -229,7 +258,8 @@ export class ZonDecoder {
         rows: [],
         prev_vals: Object.fromEntries(cols.map(col => [col, null])),
         row_index: 0,
-        expected_rows: count
+        expected_rows: count,
+        deltaCols
       }];
     }
 
@@ -251,7 +281,19 @@ export class ZonDecoder {
         }
       }
 
-      const cols = colsStr.split(',').map(c => c.trim());
+      const rawCols = colsStr.split(',').map(c => c.trim());
+      const cols: string[] = [];
+      const deltaCols = new Set<string>();
+
+      for (const rawCol of rawCols) {
+        if (rawCol.endsWith(':delta')) {
+          const colName = rawCol.substring(0, rawCol.length - 6);
+          cols.push(colName);
+          deltaCols.add(colName);
+        } else {
+          cols.push(rawCol);
+        }
+      }
 
       return ['data', {
         cols,
@@ -259,7 +301,8 @@ export class ZonDecoder {
         rows: [],
         prev_vals: Object.fromEntries(cols.map(col => [col, null])),
         row_index: 0,
-        expected_rows: count
+        expected_rows: count,
+        deltaCols
       }];
     }
 
@@ -282,7 +325,19 @@ export class ZonDecoder {
       }
 
       // Parse visible columns
-      const cols = colsStr.split(',').map(c => c.trim());
+      const rawCols = colsStr.split(',').map(c => c.trim());
+      const cols: string[] = [];
+      const deltaCols = new Set<string>();
+
+      for (const rawCol of rawCols) {
+        if (rawCol.endsWith(':delta')) {
+          const colName = rawCol.substring(0, rawCol.length - 6);
+          cols.push(colName);
+          deltaCols.add(colName);
+        } else {
+          cols.push(rawCol);
+        }
+      }
 
       return ['data', {
         cols,
@@ -290,7 +345,8 @@ export class ZonDecoder {
         rows: [],
         prev_vals: Object.fromEntries(cols.map(col => [col, null])),
         row_index: 0,
-        expected_rows: count
+        expected_rows: count,
+        deltaCols
       }];
     }
 
@@ -305,14 +361,27 @@ export class ZonDecoder {
     const tableName = v1Match[1];
     const count = parseInt(v1Match[2], 10);
     const colsStr = v1Match[3];
-    const cols = colsStr.split(',').map(c => c.trim());
+    const rawCols = colsStr.split(',').map(c => c.trim());
+    const cols: string[] = [];
+    const deltaCols = new Set<string>();
+
+    for (const rawCol of rawCols) {
+      if (rawCol.endsWith(':delta')) {
+        const colName = rawCol.substring(0, rawCol.length - 6);
+        cols.push(colName);
+        deltaCols.add(colName);
+      } else {
+        cols.push(rawCol);
+      }
+    }
 
     return [tableName, {
       cols,
       rows: [],
       prev_vals: Object.fromEntries(cols.map(col => [col, null])),
       row_index: 0,
-      expected_rows: count
+      expected_rows: count,
+      deltaCols
     }];
   }
 
@@ -364,7 +433,34 @@ export class ZonDecoder {
     for (const col of table.cols) {
       if (tokenIdx < tokens.length) {
         const tok = tokens[tokenIdx];
-        row[col] = this._parseValue(tok);
+        let val = this._parseValue(tok);
+
+        // Dictionary expansion
+        if (table.dictionaries && table.dictionaries.has(col) && typeof val === 'number') {
+          const dict = table.dictionaries.get(col)!;
+          if (val >= 0 && val < dict.length) {
+            val = dict[val];
+          }
+        }
+
+        // Delta Decoding
+        if (table.deltaCols && table.deltaCols.has(col)) {
+          if (table.row_index === 0) {
+            // First row is absolute
+            table.prev_vals[col] = val;
+          } else {
+            // Subsequent rows are deltas
+            if (typeof val === 'number' && typeof table.prev_vals[col] === 'number') {
+              val = table.prev_vals[col] + val;
+              table.prev_vals[col] = val;
+            } else {
+              // Fallback if type mismatch (shouldn't happen in valid ZON)
+              table.prev_vals[col] = val;
+            }
+          }
+        }
+
+        row[col] = val;
         tokenIdx++;
       }
     }
@@ -378,8 +474,8 @@ export class ZonDecoder {
         const key = tok.substring(0, colonIdx).trim();
         const val = tok.substring(colonIdx + 1).trim();
         
-        // Validate key is a simple identifier
-        if (/^[a-zA-Z_]\w*$/.test(key)) {
+        // Validate key is a simple identifier or dot-notation path
+        if (/^[a-zA-Z_][\w\.]*$/.test(key)) {
           row[key] = this._parseValue(val);
         } else {
           // Not a key:value pair, might be a value with colon

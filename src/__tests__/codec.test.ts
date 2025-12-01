@@ -199,7 +199,8 @@ describe('ZON Codec', () => {
       const decoded = decode(encoded);
       expect(decoded).toEqual(data);
 
-      expect(encoded).toContain('context.task:');
+      expect(encoded).toContain('context{');
+      expect(encoded).toContain('task:Our favorite hikes together');
       expect(encoded).toContain('friends[');
       expect(encoded).toContain('hikes:@(3):companion,distanceKm,elevationGain,id,name,wasSunny');
     });

@@ -2,7 +2,9 @@
 
 Copyright (c) 2025 ZON-FORMAT (Roni Bhakta)
 
-Guide for maximizing ZON's effectiveness in LLM applications.
+Copyright (c) 2025 ZON-FORMAT (Roni Bhakta)
+ 
+ Guide for maximizing ZON's effectiveness in LLM applications. Updated for v1.0.5.
 
 ## Why ZON for LLMs?
 
@@ -177,14 +179,14 @@ Find all in-stock Electronics with rating above 4.0.
 
 ````
 ```zon
-metadata:"{version:1.0.5,env:production,deployed:2025-01-15}"
+metadata{deployed:2025-01-15,env:production,version:1.0.5}
 users:@(5):id,name,active
 1,Alice,T
 2,Bob,F
 3,Carol,T
 4,Dan,T
 5,Eve,F
-config:"{database:{host:localhost,port:5432},cache:{ttl:3600}}"
+config{database{host:localhost,port:5432},cache{ttl:3600}}
 ```
 
 Questions:
@@ -299,10 +301,10 @@ Question: How many posts did each admin user create?
 
 ````
 ```zon
-config:"{version:1.0,env:prod,features:{darkMode:T,beta:F}}"
+config{env:prod,features{beta:F,darkMode:T},version:1.0}
 users:@(1000):id,name,lastLogin
 ...
-stats:"{totalUsers:1000,activeToday:245,avgSessionTime:420}"
+stats{activeToday:245,avgSessionTime:420,totalUsers:1000}
 ```
 
 What percentage of users were active today?

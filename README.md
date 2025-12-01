@@ -289,10 +289,9 @@ hikes[3]{id,name,distanceKm,elevationGain,companion,wasSunny}:
 ZON conveys the same information with **even fewer tokens** than TOON – using compact table format with explicit headers:
 
 ```
-context.task:Our favorite hikes together
-context.location:Boulder
-context.season:spring_2025
-friends:ana,luis,sam
+```
+context{location:Boulder,season:spring_2025,task:Our favorite hikes together}
+friends[ana,luis,sam]
 hikes:@(3):companion,distanceKm,elevationGain,id,name,wasSunny
 ana,7.5,320,1,Blue Lake Trail,T
 luis,9.2,540,2,Ridge Overlook,F
@@ -336,7 +335,7 @@ ZON automatically flattens top-level nested objects to reduce indentation.
 ```
 **ZON:**
 ```
-config.database{host:localhost}
+config{database{host:localhost}}
 ```
 
 ### 4. Colon-less Structure
@@ -358,11 +357,13 @@ user{name:Alice,roles[admin,dev]}
 - 💾 **Most Token-Efficient**: 4-15% fewer tokens than TOON across all tokenizers
 - 🎯 **JSON Data Model**: Encodes the same objects, arrays, and primitives as JSON with deterministic, lossless round-trips
 - 📐 **Minimal Syntax**: Explicit headers (`@(N)` for count, column list) eliminate ambiguity for LLMs
-- 🧺 **Tabular Arrays**: Uniform arrays collapse into tables that declare fields once and stream row values
-- 🔢 **Canonical Numbers**: No scientific notation (1000000, not 1e6), NaN/Infinity → null
+- 🌊 **Streaming Support** (New): Process gigabytes of data with `ZonStreamEncoder`/`Decoder` – **Unique to ZON**
+- 📉 **Delta Encoding** (New): Sequential numbers are delta-encoded (`:delta`) for maximum compression – **Unique to ZON**
+- 🧠 **LLM Optimization** (New): Context-aware encoding (`encodeLLM`) reorders fields for optimal tokenization – **Unique to ZON**
 - 🌳 **Deep Nesting**: Handles complex nested structures efficiently (91% compression on 50-level deep objects)
+- 🌐 **Browser & Edge Ready**: Verified support for Cloudflare Workers, Vercel Edge, and Browsers
 - 🔒 **Security Limits**: Automatic DOS prevention (100MB docs, 1M arrays, 100K keys)
-- ✅ **Production Ready**: 94/94 tests pass, 27/27 datasets verified, zero data loss
+- ✅ **Production Ready**: 121/121 tests pass, 27/27 datasets verified, zero data loss
 
 ---
 
@@ -666,7 +667,7 @@ F,3,Carol,Guest
 Best for configuration and nested structures:
 
 ```
-config:"{database:{host:db.example.com,port:5432},features:{darkMode:T}}"
+config{database{host:db.example.com,port:5432},features{darkMode:T}}
 ```
 
 ### Mixed Structures
@@ -674,12 +675,12 @@ config:"{database:{host:db.example.com,port:5432},features:{darkMode:T}}"
 ZON intelligently combines formats:
 
 ```
-metadata:"{version:1.0.5,env:production}"
+metadata{env:production,version:1.0.5}
 users:@(5):id,name,active
 1,Alice,T
 2,Bob,F
 ...
-logs:"[{id:101,level:INFO},{id:102,level:WARN}]"
+logs:[{id:101,level:INFO},{id:102,level:WARN}]
 ```
 
 ---

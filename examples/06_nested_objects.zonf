@@ -1,5 +1,4 @@
-customer.address{street:123 Main St,city:Wonderland}
-customer.name:Alice
+customer{address{city:Wonderland,street:123 Main St},name:Alice}
 orderId:ORD-123
 
 items:@(2):price,productId,qty

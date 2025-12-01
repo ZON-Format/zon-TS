@@ -20,7 +20,7 @@ Zero Overhead Notation (ZON) is a compact, line-oriented text format that encode
 
 ## Status of This Document
 
-This document is a **Stable Release v1.0.4** and defines normative behavior for ZON encoders, decoders, and validators. Implementation feedback should be reported at https://github.com/ZON-Format/zon-TS.
+This document is a **Stable Release v1.0.5** and defines normative behavior for ZON encoders, decoders, and validators. Implementation feedback should be reported at https://github.com/ZON-Format/zon-TS.
 
 Backward compatibility is maintained across v1.0.x releases. Major versions (v2.x) may introduce breaking changes.
 
@@ -458,17 +458,23 @@ Decodes to:
 ```
 
 ### 8.2 Nested Objects
-
-Quoted compound notation:
-
-```zon
-config:"{database:{host:localhost,port:5432},cache:{ttl:3600}}"
-```
-
-Alternatively using JSON string:
-```zon
-config:"{"database":{"host":"localhost","port":5432}}"
-```
+ 
+ Grouped object notation (preferred):
+ 
+ ```zon
+ config{database{host:localhost,port:5432},cache{ttl:3600}}
+ ```
+ 
+ Quoted compound notation (legacy/alternative):
+ 
+ ```zon
+ config:"{database:{host:localhost,port:5432},cache:{ttl:3600}}"
+ ```
+ 
+ Alternatively using JSON string:
+ ```zon
+ config:"{"database":{"host":"localhost","port":5432}}"
+ ```
 
 ### 8.3 Empty Objects
 
@@ -580,6 +586,38 @@ users:@(3):id,name
 ```json
 {"id": 2, "name": "Bob", "role": "admin", "score": 98}
 ```
+
+### 10.5 Delta Encoding (v1.0.5)
+ 
+ Sequential numeric columns can be delta-encoded to save tokens.
+ 
+ **Header Syntax:** `key:@(N):col1,col2:delta`
+ 
+ ```zon
+ timeseries:@(3):ts:delta,val
+ 1000,10
+ +60,12
+ +60,15
+ ```
+ 
+ **Decodes to:**
+ ```json
+ [
+   {"ts": 1000, "val": 10},
+   {"ts": 1060, "val": 12},
+   {"ts": 1120, "val": 15}
+ ]
+ ```
+ 
+ ### 10.6 Hierarchical Sparse Encoding (v1.0.5)
+ 
+ Nested objects in tables are flattened using dot notation for sparse columns.
+ 
+ ```zon
+ users:@(2):id
+ 1,meta.role:admin
+ 2,meta.role:user,meta.active:T
+ ```
 
 ---
 
@@ -1026,7 +1064,14 @@ users:@(1):id,name
 
 ### Appendix C: Changelog
 
-**v1.0.4 (2025-11-29)**
+**v1.0.5 (2025-12-01)**
+ - Delta Encoding (`:delta`)
+ - Hierarchical Sparse Encoding (deep flattening)
+ - Metadata Optimization (grouped objects)
+ - Type Coercion (opt-in)
+ - LLM Optimizations (`encodeLLM`)
+ 
+ **v1.0.4 (2025-11-29)**
 - Disabled sequential column omission
 - 100% LLM accuracy achieved
 - All columns explicit
@@ -1035,7 +1080,6 @@ users:@(1):id,name
 - Irregularity threshold tuning
 - ISO date detection
 - Sparse table encoding
-
 **v1.0.1 (2025-11-26)**
 - License: MIT
 - Documentation updates

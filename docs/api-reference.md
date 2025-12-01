@@ -60,7 +60,26 @@ F,2,Bob
 - **Booleans** → `T`/`F` (single character)
 - **Null** → `null`
 
----
+### `encodeLLM(input: any, context: LLMContext): string`
+ 
+ Encodes data with optimizations tailored for specific LLM tasks (retrieval vs. generation).
+ 
+ **Parameters:**
+ - `input` (`any`) - Data to encode
+ - `context` (`LLMContext`) - Context options
+   - `task`: `'retrieval' | 'generation' | 'analysis'`
+   - `model`: `'gpt-4' | 'claude-3' | 'llama-3'` (optional)
+ 
+ **Returns:** `string` - Optimized ZON string
+ 
+ **Example:**
+ ```typescript
+ import { encodeLLM } from 'zon-format';
+ 
+ const prompt = encodeLLM(data, { task: 'retrieval' });
+ ```
+ 
+ ---
 
 ## Decoding Functions
 
@@ -72,7 +91,8 @@ Decodes a ZON format string back to the original JavaScript data structure.
 
 - **`zonString`** (`string`): The ZON-formatted string to decode
 - **`options`** (`DecodeOptions`, optional): Decoding options
-  - **`strict`** (`boolean`, default: `true`): Enable strict validation
+   - **`strict`** (`boolean`, default: `true`): Enable strict validation
+   - **`enableTypeCoercion`** (`boolean`, default: `false`): Enable intelligent type coercion (e.g., "true" -> true)
 
 ### Strict Mode
 
@@ -180,8 +200,20 @@ if (result.success) {
 
 ```typescript
 // Main functions
-export function encode(data: any): string;
-export function decode(zonStr: string): any;
+ export function encode(data: any): string;
+ export function encodeLLM(data: any, context: LLMContext): string;
+ export function decode(zonStr: string, options?: DecodeOptions): any;
+ 
+ // Options
+ interface DecodeOptions {
+   strict?: boolean;
+   enableTypeCoercion?: boolean;
+ }
+ 
+ interface LLMContext {
+   task: 'retrieval' | 'generation' | 'analysis';
+   model?: string;
+ }
 
 // JSON data model types
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray;
