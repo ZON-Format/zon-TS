@@ -43,7 +43,7 @@ describe('Security Limits (DOS Prevention)', () => {
 
     test('should allow objects under 100K keys', () => {
       const keys = Array(100).fill(0).map((_, i) => `k${i}:${i}`).join(',');
-      const zonData = `data:"{${keys}}"`;
+      const zonData = `data:{${keys}}`;
       
       const result = decode(zonData);
       expect(Object.keys(result.data)).toHaveLength(100);
@@ -68,12 +68,12 @@ describe('Security Limits (DOS Prevention)', () => {
   describe('Combined Limits', () => {
     test('should work with normal data within all limits', () => {
       const zonData = `
-metadata:"{version:1.1.0,env:prod}"
+metadata:{version:1.1.0,env:prod}
 users:@(3):id,name
 1,Alice
 2,Bob
 3,Carol
-tags:"[nodejs,typescript,llm]"
+tags:[nodejs,typescript,llm]
 `;
       
       const result = decode(zonData);

@@ -697,27 +697,20 @@ export class ZonDecoder {
    * @returns Parsed value
    */
   private _parseValue(val: string): any {
+    const trimmedVal = val.trim();
     const parsed = parseValue(val);
+    
+    // If the value was explicitly quoted, it is a string.
+    // Do not attempt to parse it as a ZON node, even if it looks like one.
+    if (trimmedVal.startsWith('"')) {
+      return parsed;
+    }
     
     if (typeof parsed === 'string') {
       const trimmed = parsed.trim();
       
       if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
         return this._parseZonNode(trimmed);
-      }
-      
-      if (trimmed.startsWith('"') || trimmed.startsWith('[')) {
-        try {
-           const jsonParsed = JSON.parse(trimmed);
-           if (typeof jsonParsed === 'string') {
-             const stripped = jsonParsed.trim();
-             if (stripped.startsWith('{') || stripped.startsWith('[')) {
-               return this._parseZonNode(stripped);
-             }
-           }
-           return jsonParsed;
-        } catch (e) {
-        }
       }
     }
     
