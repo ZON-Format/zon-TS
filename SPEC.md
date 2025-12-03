@@ -403,6 +403,7 @@ Pattern: `^[a-zA-Z0-9_\-\.]+$`
 **Examples:**
 ```zonf
 name:Alice
+full_name:Alice Smith
 user_id:u123
 version:v1.1.0
 api-key:sk_test_key
@@ -415,7 +416,7 @@ Quote strings if they:
 1. **Contain structural chars:** `,`, `:`, `[`, `]`, `{`, `}`, `"`
 2. **Match literal keywords:** `T`, `F`, `true`, `false`, `null`, `none`, `nil`
 3. **Look like PURE numbers:** `123`, `3.14`, `1e6` (Complex patterns like `192.168.1.1` or `v1.1.0` do NOT need quoting)
-4. **Have whitespace:** Leading/trailing spaces, internal spaces (MUST quote to preserve)
+4. **Have whitespace:** Leading/trailing spaces (MUST quote to preserve). Internal spaces are allowed in unquoted strings.
 5. **Are empty:** `""` (MUST quote to distinguish from `null`)
 6. **Contain escapes:** Newlines, tabs, quotes (MUST quote to prevent structure breakage)
 
@@ -586,28 +587,6 @@ users:@(3):id,name
 ```json
 {"id": 2, "name": "Bob", "role": "admin", "score": 98}
 ```
-
-### 10.5 Delta Encoding (v1.1.0)
- 
- Sequential numeric columns can be delta-encoded to save tokens.
- 
- **Header Syntax:** `key:@(N):col1,col2:delta`
- 
- ```zonf
- timeseries:@(3):ts:delta,val
- 1000,10
- +60,12
- +60,15
- ```
- 
- **Decodes to:**
- ```json
- [
-   {"ts": 1000, "val": 10},
-   {"ts": 1060, "val": 12},
-   {"ts": 1120, "val": 15}
- ]
- ```
  
  ### 10.6 Hierarchical Sparse Encoding (v1.1.0)
  
@@ -1073,7 +1052,7 @@ users:@(1):id,name
 ### Appendix C: Changelog
 
 **v1.1.0 (2025-12-01)**
- - Delta Encoding (`:delta`)
+ - Sparse Tables (`key:value` in rows)
  - Hierarchical Sparse Encoding (deep flattening)
  - Metadata Optimization (grouped objects)
  - Type Coercion (opt-in)

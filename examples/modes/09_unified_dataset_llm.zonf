@@ -1,4 +1,4 @@
-config{cache{enabled:T,nodes[redis-1,redis-2,redis-3],provider:redis,ttl:3600},database{host:db-primary.internal,poolSize:50,port:5432,replicas[{host:db-read-1.internal,priority:10},{host:db-read-2.internal,priority:5}],timeout:30000},features{analytics{enabled:T,sampleRate:0.5},betaAccess:F,darkMode:T}}
+config{cache{enabled:true,nodes[redis-1,redis-2,redis-3],provider:redis,ttl:3600},database{host:db-primary.internal,poolSize:50,port:5432,replicas[{host:db-read-1.internal,priority:10},{host:db-read-2.internal,priority:5}],timeout:30000},features{analytics{enabled:true,sampleRate:0.5},betaAccess:false,darkMode:true}}
 metadata{location:us-east-1,systemId:SYS-CORE-001,tags[production,critical,web-cluster],uptime:1245600,version:2.5.0}
 
 feed:@(3):content,id,type
@@ -7,21 +7,21 @@ ZON is the future of data serialization!,f1,post,author:tech_guru,likes:120,shar
 Deploy your ZON apps instantly.,f3,ad,clickCount:500,sponsor:CloudCorp
 
 logs:@(6):id,level,message,source,timestamp
-101,INFO,System startup,kernel,2025-02-01T10:00:00Z
-102,INFO,Database connected,db-pool,2025-02-01T10:00:05Z,latency:12
-103,WARN,High memory usage,monitor,2025-02-01T10:01:20Z,usage:85
-104,ERROR,Connection timeout,api-gateway,2025-02-01T10:05:00Z,requestId:req-abc-123
-105,INFO,Scheduled backup started,backup-service,2025-02-01T10:10:00Z
-106,INFO,Scheduled backup completed,backup-service,2025-02-01T10:15:00Z,duration:300
+101,INFO,System startup,kernel,2025-02-01T10:00:00.000Z
+102,INFO,Database connected,db-pool,2025-02-01T10:00:05.000Z,latency:12
+103,WARN,High memory usage,monitor,2025-02-01T10:01:20.000Z,usage:85
+104,ERROR,Connection timeout,api-gateway,2025-02-01T10:05:00.000Z,requestId:req-abc-123
+105,INFO,Scheduled backup started,backup-service,2025-02-01T10:10:00.000Z
+106,INFO,Scheduled backup completed,backup-service,2025-02-01T10:15:00.000Z,duration:300
 
 products:@(3):category,id,inStock,name,price,tags
-Electronics,p1,T,Wireless Headphones,99.99,[audio,bluetooth,sale]
-Furniture,p2,F,Ergonomic Chair,249.5,[office,comfort]
-Electronics,p3,T,Gaming Mouse,59.99,[gaming,rgb]
+Electronics,p1,true,Wireless Headphones,99.99,[audio,bluetooth,sale]
+Furniture,p2,false,Ergonomic Chair,249.5,[office,comfort]
+Electronics,p3,true,Gaming Mouse,59.99,[gaming,rgb]
 
 users:@(5):active,id,lastLogin,loginCount,name,role
-T,1,2025-02-01T08:30:00Z,154,Alice Admin,admin
-T,2,2025-02-01T09:15:00Z,89,Bob Builder,dev
-F,3,2025-01-28T14:20:00Z,42,Charlie Check,qa
-T,4,2025-02-01T07:45:00Z,210,Dave Deploy,ops
-T,5,2025-02-01T10:00:00Z,5,Eve External,guest
+true,1,2025-02-01T08:30:00.000Z,154,Alice Admin,admin
+true,2,2025-02-01T09:15:00.000Z,89,Bob Builder,dev
+false,3,2025-01-28T14:20:00.000Z,42,Charlie Check,qa
+true,4,2025-02-01T07:45:00.000Z,210,Dave Deploy,ops
+true,5,2025-02-01T10:00:00.000Z,5,Eve External,guest

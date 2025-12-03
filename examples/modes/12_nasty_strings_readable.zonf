@@ -16,7 +16,7 @@ json_injection:
   - "/* comment */"
 path_traversal:[../../etc/passwd,..\..\windows\system32\config\sam]
 script_injection:
-  - "<script>alert('xss')</script>"
+  - <script>alert('xss')</script>
   - javascript:void(0)
   - "'; DROP TABLE users; --"
 unicode:

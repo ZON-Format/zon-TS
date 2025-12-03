@@ -139,7 +139,6 @@ export class AdaptiveEncoder {
       decisions.push(`Deep nesting (${analysis.nesting}) → inline format preferred`);
       return {
         enableDictCompression: false,  // Inline format doesn't use dict compression
-        disableDeltaEncoding: true
       };
     }
     
@@ -148,8 +147,7 @@ export class AdaptiveEncoder {
       decisions.push(`High irregularity (${(analysis.irregularity * 100).toFixed(0)}%) → basic encoding`);
       return {
         enableDictCompression: false,
-        enableTypeCoercion: false,
-        disableDeltaEncoding: true
+        enableTypeCoercion: false
       };
     }
     
@@ -157,8 +155,7 @@ export class AdaptiveEncoder {
     decisions.push('Uniform data → table format with optimizations');
     return {
       enableDictCompression: true,
-      enableTypeCoercion: true,
-      disableDeltaEncoding: true
+      enableTypeCoercion: true
     };
   }
   
@@ -169,8 +166,7 @@ export class AdaptiveEncoder {
     decisions.push('Compact mode: maximum compression enabled');
     return {
       enableDictCompression: true,
-      enableTypeCoercion: true,
-      disableDeltaEncoding: true
+      enableTypeCoercion: false      // Use T/F for max compression
     };
   }
   
@@ -183,8 +179,7 @@ export class AdaptiveEncoder {
     return {
       enableDictCompression: false,   // Disable dictionary compression for readability
       enableTypeCoercion: false,      // No type transformations
-      disableTables: false,           // Enable tables for uniform data patterns
-      disableDeltaEncoding: true      // Show full values (1,2,3...) not deltas (+1)
+      disableTables: false            // Enable tables for uniform data patterns
     };
   }
   
@@ -200,8 +195,7 @@ export class AdaptiveEncoder {
     // and delta encoding (+1) reduce readability and make data harder for LLMs
     return {
       enableDictCompression: false,   // Show actual values, not dictionary indices
-      enableTypeCoercion: false,      // Maintain type clarity (true/false not T/F)
-      disableDeltaEncoding: true      // Show full values (1,2,3...) not deltas (+1)
+      enableTypeCoercion: true        // Use true/false for LLM clarity
     };
   }
   

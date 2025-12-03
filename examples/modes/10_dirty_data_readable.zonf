@@ -26,7 +26,7 @@ primitives: {
     - "with, comma"
     - with: colon
     - 'with "quotes"'
-    - "with 'single quotes'"
+    - with 'single quotes'
     - with \n newline
     - "https://example.com/path?query=1&param=2"
     - "special: !@#$%^&*()_+{}[]|\\\\:;""'<>,.?/~`"

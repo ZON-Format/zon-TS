@@ -1,6 +1,0 @@
-metadata{generated:2023-10-27,version:1.0.0}
-
-users:@(3):active,id,name,role,scores
-T,1,Alice,admin,[10,20,30]
-F,2,Bob,user,[15,25,35]
-T,3,Charlie,user,[5,15,25]

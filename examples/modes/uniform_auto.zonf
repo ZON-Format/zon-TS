@@ -1,6 +1,0 @@
-employees:@(5):active,department,id,name,role
-true,Engineering,1,User 1,admin
-true,Engineering,2,User 2,user
-true,Engineering,3,User 3,admin
-true,Engineering,4,User 4,user
-true,Engineering,5,User 5,admin

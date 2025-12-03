@@ -1,6 +1,6 @@
 import { ZonEncoder } from '../core/encoder';
 import { ZonDecoder } from '../core/decoder';
-import { SparseMode } from '../core/types';
+
 
 describe('Advanced Sparse Encoding', () => {
   let encoder: ZonEncoder;
@@ -11,67 +11,7 @@ describe('Advanced Sparse Encoding', () => {
     decoder = new ZonDecoder();
   });
 
-  describe('Delta Encoding', () => {
-    it('should encode sequential numbers using delta format', () => {
-      const data = [
-        { id: 100, val: 10 },
-        { id: 101, val: 20 },
-        { id: 102, val: 15 },
-        { id: 105, val: 30 }, // +3 jump
-        { id: 106, val: 31 }  // +1
-      ];
 
-      const encoded = encoder.encode(data);
-      // Expect header to contain id:delta
-      expect(encoded).toContain('id:delta');
-      
-      // Expect values to be deltas
-      // Row 1: 100
-      // Row 2: +1
-      // Row 3: +1
-      // Row 4: +3
-      // Row 5: +1
-      expect(encoded).toContain('100');
-      expect(encoded).toContain('+1');
-      expect(encoded).toContain('+3');
-
-      const decoded = decoder.decode(encoded);
-      expect(decoded).toEqual(data);
-    });
-
-    it('should handle negative deltas', () => {
-      const data = [
-        { temp: 20 },
-        { temp: 18 }, // -2
-        { temp: 15 }, // -3
-        { temp: 20 }, // +5
-        { temp: 10 }  // -10
-      ];
-
-      const encoded = encoder.encode(data);
-      expect(encoded).toContain('temp:delta');
-      expect(encoded).toContain('-2');
-      expect(encoded).toContain('-3');
-      expect(encoded).toContain('+5');
-      expect(encoded).toContain('-10');
-
-      const decoded = decoder.decode(encoded);
-      expect(decoded).toEqual(data);
-    });
-
-    it('should fallback to standard encoding for non-numeric or short sequences', () => {
-      const data = [
-        { id: 1 },
-        { id: 2 }
-      ]; // Too short for delta (min 5)
-
-      const encoded = encoder.encode(data);
-      expect(encoded).not.toContain('id:delta');
-      
-      const decoded = decoder.decode(encoded);
-      expect(decoded).toEqual(data);
-    });
-  });
 
   describe('Hierarchical Sparse Encoding', () => {
     it('should flatten nested objects into dot-notation columns', () => {

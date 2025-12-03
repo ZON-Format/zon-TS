@@ -9,105 +9,11 @@ ZON includes advanced compression and optimization features that dramatically re
 
 ## Table of Contents
 
-- [Delta Encoding](#delta-encoding)
+
 - [Dictionary Compression](#dictionary-compression)
 - [Type Coercion](#type-coercion)
 - [LLM-Aware Field Ordering](#llm-aware-field-ordering)
 - [Hierarchical Sparse Encoding](#hierarchical-sparse-encoding)
-
----
-
-## Delta Encoding
-
-**Introduced:** v1.1.0  
-**Purpose:** Compress sequential numeric columns
-
-### How It Works
-
-Instead of storing absolute values, delta encoding stores the difference from the previous value:
-
-```
-# Without delta:
-ids:@(1000):id
-1,2,3,4,5,...,1000
-
-# With delta (`:delta` marker):
-ids:@(1000):id:delta
-1,+1,+1,+1,+1,...,+1
-```
-
-**Token Savings:** Up to 70% for sequential IDs or timestamps.
-
-### When To Use
-
-Delta encoding is automatically applied when ALL conditions are met:
-
-1. Column contains **only numbers**
-2. Column has **≥5 values**
-3. Values are **sequential** (small deltas)
-
-### Examples
-
-```typescript
-import { encode } from 'zon-format';
-
-// Sequential IDs
-const data = {
-  records: Array.from({ length: 1000 }, (_, i) => ({
-    id: i + 1,
-    name: `Record ${i}`
-  }))
-};
-
-const zon = encode(data);
-console.log(zon);
-/*
-records:@(1000):id:delta,name
-1,Record 0
-+1,Record 1
-+1,Record 2
-...
-*/
-```
-
-**Timestamps:**
-
-```typescript
-const logs = [
-  { timestamp: 1609459200, message: 'Started' },
-  { timestamp: 1609459260, message: 'Processing' }, // +60
-  { timestamp: 1609459320, message: 'Done' }        // +60
-];
-
-// Encoded as:
-// logs:@(3):message,timestamp:delta
-// Started,1609459200
-// Processing,+60
-// Done,+60
-```
-
-### Decoding
-
-Delta encoding is automatically reversed during decoding:
-
-```typescript
-import { decode } from 'zon-format';
-
-const zon = `
-records:@(3):id:delta,name
-1,Alice
-+1,Bob
-+1,Carol
-`;
-
-const data = decode(zon);
-console.log(data.records);
-// [
-//   { id: 1, name: 'Alice' },
-//   { id: 2, name: 'Bob' },
-//   { id: 3, name: 'Carol' }
-// ]
-```
 
 ---
 
@@ -400,7 +306,7 @@ const data = {
 
 ## Performance Tips
 
-1. **Delta encoding**: Best for time-series and sequential IDs
+1. **Dictionary compression**: Best for repetitive strings (enums, categories)
 2. **Dictionary compression**: Best for categorical data (status, roles, countries)
 3. **Type coercion**: Enable when dealing with LLM outputs
 4. **Field ordering**: Use for retrieval-heavy applications

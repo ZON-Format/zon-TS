@@ -6,7 +6,7 @@ import {
   DEFAULT_ANCHOR_INTERVAL
 } from './constants';
 import { quoteString } from './utils';
-import { SparseMode } from './types';
+
 import { TypeInferrer } from '../schema/type-inference';
 import { embedVersion, stripVersion } from './versioning';
 
@@ -43,8 +43,6 @@ export interface EncodeOptions {
   schemaId?: string;
   /** Disable table formatting (default: false) */
   disableTables?: boolean;
-  /** Disable delta encoding for sequential columns (default: false) */
-  disableDeltaEncoding?: boolean;
 }
 
 /**
@@ -57,22 +55,19 @@ export class ZonEncoder {
   private enableDictionaryCompression: boolean;
   private enableTypeCoercion: boolean;
   private disableTables: boolean;
-  private disableDeltaEncoding: boolean;
   private typeInferrer: TypeInferrer;
 
   constructor(
     anchorInterval: number = DEFAULT_ANCHOR_INTERVAL, 
     enableDictCompression: boolean = true,
     enableTypeCoercion: boolean = false,
-    disableTables: boolean = false,
-    disableDeltaEncoding: boolean = false
+    disableTables: boolean = false
   ) {
     this.anchor_interval = anchorInterval;
     this.safe_str_re = /^[a-zA-Z0-9_\-\.]+$/;
     this.enableDictionaryCompression = enableDictCompression;
     this.enableTypeCoercion = enableTypeCoercion;
     this.disableTables = disableTables;
-    this.disableDeltaEncoding = disableDeltaEncoding;
     this.typeInferrer = new TypeInferrer();
   }
 
@@ -227,49 +222,7 @@ export class ZonEncoder {
 
 
 
-  /**
-   * Analyzes values to determine optimal sparse encoding mode.
-   * 
-   * @param values - Array of values to analyze
-   * @returns Optimal sparse mode (DELTA or NONE)
-   */
-  private _analyzeOptimalSparseMode(values: any[]): SparseMode {
-    if (values.length < 5) return SparseMode.NONE;
 
-    let isNumeric = true;
-    
-    for (let i = 0; i < values.length; i++) {
-      const val = values[i];
-      if (typeof val !== 'number') {
-        isNumeric = false;
-        break;
-      }
-    }
-
-    if (isNumeric) {
-      return SparseMode.DELTA;
-    }
-
-    return SparseMode.NONE;
-  }
-
-  /**
-   * Encodes numeric column with delta encoding.
-   * 
-   * @param values - Array of numeric values
-   * @returns Delta-encoded string
-   */
-  private _encodeDeltaColumn(values: number[]): string {
-    if (values.length === 0) return '';
-    
-    const deltas: string[] = [String(values[0])];
-    for (let i = 1; i < values.length; i++) {
-      const delta = values[i] - values[i - 1];
-      deltas.push(delta >= 0 ? `+${delta}` : String(delta));
-    }
-    
-    return deltas.join('');
-  }
 
   /**
    * Writes table data with adaptive encoding strategy.
@@ -315,28 +268,6 @@ export class ZonEncoder {
     const coreColumns = columnStats.filter(c => c.presence >= 0.7).map(c => c.name);
     const optionalColumns = columnStats.filter(c => c.presence < 0.7).map(c => c.name);
 
-    const deltaColumns: string[] = [];
-    const regularCoreColumns: string[] = [];
-    
-    // Skip delta encoding if disabled
-    if (this.disableDeltaEncoding) {
-      regularCoreColumns.push(...coreColumns);
-    } else {
-      for (const col of coreColumns) {
-        const values = flatStream.map(row => row[col]);
-        const mode = this._analyzeOptimalSparseMode(values);
-        if (mode === SparseMode.DELTA) {
-          deltaColumns.push(col);
-        } else {
-          regularCoreColumns.push(col);
-        }
-      }
-    }
-
-    if (deltaColumns.length > 0) {
-      return this._writeDeltaTable(flatStream, regularCoreColumns, deltaColumns, optionalColumns, stream.length, key);
-    }
-
     const useSparseEncoding = optionalColumns.length > 0;
 
     if (useSparseEncoding) {
@@ -344,84 +275,11 @@ export class ZonEncoder {
     } else {
       return this._writeStandardTable(flatStream, cols, stream.length, key);
     }
+
+
   }
 
-  /**
-   * Writes table with delta-encoded columns.
-   * 
-   * @param flatStream - Flattened data rows
-   * @param regularCols - Regular column names
-   * @param deltaCols - Delta-encoded column names  
-   * @param optionalCols - Optional/sparse column names
-   * @param rowCount - Number of rows
-   * @param key - Table key name
-   * @returns Array of formatted lines
-   */
-  private _writeDeltaTable(
-    flatStream: Record<string, any>[],
-    regularCols: string[],
-    deltaCols: string[],
-    optionalCols: string[],
-    rowCount: number,
-    key: string
-  ): string[] {
-    const lines: string[] = [];
-    
-    let header = '';
-    if (key && key !== 'data') {
-      header = `${key}${META_SEPARATOR}${TABLE_MARKER}(${rowCount})`;
-    } else {
-      header = `${TABLE_MARKER}${rowCount}`;
-    }
 
-    const deltaDefs = deltaCols.map(c => `${c}:delta`);
-    const allCols = [...deltaDefs, ...regularCols];
-    
-    header += `${META_SEPARATOR}${allCols.join(',')}`;
-    lines.push(header);
-
-    const deltaValuesMap = new Map<string, string>();
-    for (const col of deltaCols) {
-      const values = flatStream.map(row => row[col]);
-      deltaValuesMap.set(col, this._encodeDeltaColumn(values));
-    }
-    
-    for (let i = 0; i < rowCount; i++) {
-      const row = flatStream[i];
-      const tokens: string[] = [];
-
-      for (const col of deltaCols) {
-        const val = row[col];
-        if (i === 0) {
-          tokens.push(String(val));
-        } else {
-          const prev = flatStream[i-1][col];
-          const diff = val - prev;
-          tokens.push(diff >= 0 ? `+${diff}` : String(diff));
-        }
-      }
-
-      for (const col of regularCols) {
-        const val = row[col];
-        if (val === undefined || val === null) {
-          tokens.push('null');
-        } else {
-          tokens.push(this._formatValue(val));
-        }
-      }
-
-      for (const col of optionalCols) {
-        if (col in row && row[col] !== undefined) {
-          const val = this._formatValue(row[col]);
-          tokens.push(`${col}:${val}`);
-        }
-      }
-
-      lines.push(tokens.join(','));
-    }
-
-    return lines;
-  }
 
   /**
    * Writes standard table format.
@@ -435,8 +293,6 @@ export class ZonEncoder {
   private _writeStandardTable(flatStream: Record<string, any>[], cols: string[], rowCount: number, key: string): string[] {
     const lines: string[] = [];
 
-    const omittedCols = this._analyzeSequentialColumns(flatStream, cols);
-
     let header = '';
     if (key && key !== 'data') {
       header = `${key}${META_SEPARATOR}${TABLE_MARKER}(${rowCount})`;
@@ -444,17 +300,12 @@ export class ZonEncoder {
       header = `${TABLE_MARKER}${rowCount}`;
     }
 
-    if (omittedCols.length > 0) {
-      header += omittedCols.map(c => `[${c}]`).join('');
-    }
-
-    const visibleCols = cols.filter(c => !omittedCols.includes(c));
-    header += `${META_SEPARATOR}${visibleCols.join(',')}`;
+    header += `${META_SEPARATOR}${cols.join(',')}`;
     lines.push(header);
 
     for (const row of flatStream) {
       const tokens: string[] = [];
-      for (const col of visibleCols) {
+      for (const col of cols) {
         const val = row[col];
         if (val === undefined || val === null) {
           tokens.push('null');
@@ -487,8 +338,6 @@ export class ZonEncoder {
   ): string[] {
     const lines: string[] = [];
 
-    const omittedCols = this._analyzeSequentialColumns(flatStream, coreColumns);
-
     let header = '';
     if (key && key !== 'data') {
       header = `${key}${META_SEPARATOR}${TABLE_MARKER}(${rowCount})`;
@@ -496,18 +345,13 @@ export class ZonEncoder {
       header = `${TABLE_MARKER}${rowCount}`;
     }
 
-    if (omittedCols.length > 0) {
-      header += omittedCols.map(c => `[${c}]`).join('');
-    }
-
-    const visibleCoreColumns = coreColumns.filter(c => !omittedCols.includes(c));
-    header += `${META_SEPARATOR}${visibleCoreColumns.join(',')}`;
+    header += `${META_SEPARATOR}${coreColumns.join(',')}`;
     lines.push(header);
 
     for (const row of flatStream) {
       const tokens: string[] = [];
 
-      for (const col of visibleCoreColumns) {
+      for (const col of coreColumns) {
         tokens.push(this._formatValue(row[col]));
       }
 
@@ -541,17 +385,7 @@ export class ZonEncoder {
     });
   }
 
-  /**
-   * Detects sequential columns for potential omission.
-   * Disabled in v1.0.4 for improved LLM accuracy.
-   * 
-   * @param data - Array of data rows
-   * @param cols - Column names
-   * @returns Array of omittable column names
-   */
-  private _analyzeSequentialColumns(data: Record<string, any>[], cols: string[]): string[] {
-    return [];
-  }
+
 
   /**
    * Detects dictionary compression opportunities for string columns.
@@ -980,9 +814,16 @@ export class ZonEncoder {
       return true;
     }
 
-    if (/[,\n\r\t"\[\]{}';]/.test(s)) {
-      return true;
-    }
+    if (/[,\n\r\t"\[\]{};]/.test(s)) {
+    return true;
+  }
+
+  // Single quotes are allowed in the middle of words, but not at the start
+  // (because that would look like a quoted string to the decoder)
+  if (s.startsWith("'")) {
+    return true;
+  }
+  
 
     if (s.includes('//') || s.includes('/*')) {
       return true;
@@ -1049,8 +890,7 @@ export function encode(data: any, options?: EncodeOptions): string {
     options?.anchorInterval,
     options?.enableDictCompression,
     options?.enableTypeCoercion,
-    options?.disableTables,
-    options?.disableDeltaEncoding
+    options?.disableTables
   );
   return encoder.encode(data, options);
 }

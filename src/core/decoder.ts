@@ -22,7 +22,6 @@ interface TableInfo {
   row_index: number;
   expected_rows: number;
   dictionaries?: Map<string, string[]>;
-  deltaCols?: Set<string>;
 }
 
 export class ZonDecoder {
@@ -279,16 +278,9 @@ export class ZonDecoder {
 
       const rawCols = colsStr.split(',').map(c => c.trim());
       const cols: string[] = [];
-      const deltaCols = new Set<string>();
 
       for (const rawCol of rawCols) {
-        if (rawCol.endsWith(':delta')) {
-          const colName = rawCol.substring(0, rawCol.length - 6);
-          cols.push(colName);
-          deltaCols.add(colName);
-        } else {
-          cols.push(rawCol);
-        }
+        cols.push(rawCol);
       }
 
       return [tableName, {
@@ -297,8 +289,7 @@ export class ZonDecoder {
         rows: [],
         prev_vals: Object.fromEntries(cols.map(col => [col, null])),
         row_index: 0,
-        expected_rows: count,
-        deltaCols
+        expected_rows: count
       }];
     }
 
@@ -320,16 +311,9 @@ export class ZonDecoder {
 
       const rawCols = colsStr.split(',').map(c => c.trim());
       const cols: string[] = [];
-      const deltaCols = new Set<string>();
 
       for (const rawCol of rawCols) {
-        if (rawCol.endsWith(':delta')) {
-          const colName = rawCol.substring(0, rawCol.length - 6);
-          cols.push(colName);
-          deltaCols.add(colName);
-        } else {
-          cols.push(rawCol);
-        }
+        cols.push(rawCol);
       }
 
       return ['data', {
@@ -338,8 +322,7 @@ export class ZonDecoder {
         rows: [],
         prev_vals: Object.fromEntries(cols.map(col => [col, null])),
         row_index: 0,
-        expected_rows: count,
-        deltaCols
+        expected_rows: count
       }];
     }
 
@@ -361,16 +344,9 @@ export class ZonDecoder {
 
       const rawCols = colsStr.split(',').map(c => c.trim());
       const cols: string[] = [];
-      const deltaCols = new Set<string>();
 
       for (const rawCol of rawCols) {
-        if (rawCol.endsWith(':delta')) {
-          const colName = rawCol.substring(0, rawCol.length - 6);
-          cols.push(colName);
-          deltaCols.add(colName);
-        } else {
-          cols.push(rawCol);
-        }
+        cols.push(rawCol);
       }
 
       return ['data', {
@@ -379,8 +355,7 @@ export class ZonDecoder {
         rows: [],
         prev_vals: Object.fromEntries(cols.map(col => [col, null])),
         row_index: 0,
-        expected_rows: count,
-        deltaCols
+        expected_rows: count
       }];
     }
 
@@ -396,16 +371,9 @@ export class ZonDecoder {
     const colsStr = v1Match[3];
     const rawCols = colsStr.split(',').map(c => c.trim());
     const cols: string[] = [];
-    const deltaCols = new Set<string>();
 
     for (const rawCol of rawCols) {
-      if (rawCol.endsWith(':delta')) {
-        const colName = rawCol.substring(0, rawCol.length - 6);
-        cols.push(colName);
-        deltaCols.add(colName);
-      } else {
-        cols.push(rawCol);
-      }
+      cols.push(rawCol);
     }
 
     return [tableName, {
@@ -413,8 +381,7 @@ export class ZonDecoder {
       rows: [],
       prev_vals: Object.fromEntries(cols.map(col => [col, null])),
       row_index: 0,
-      expected_rows: count,
-      deltaCols
+      expected_rows: count
     }];
   }
 
@@ -470,18 +437,7 @@ export class ZonDecoder {
           }
         }
 
-        if (table.deltaCols && table.deltaCols.has(col)) {
-          if (table.row_index === 0) {
-            table.prev_vals[col] = val;
-          } else {
-            if (typeof val === 'number' && typeof table.prev_vals[col] === 'number') {
-              val = table.prev_vals[col] + val;
-              table.prev_vals[col] = val;
-            } else {
-              table.prev_vals[col] = val;
-            }
-          }
-        }
+
 
         row[col] = val;
         tokenIdx++;
@@ -936,14 +892,32 @@ export class ZonDecoder {
       }
 
       if (['"', "'"].includes(char)) {
-        if (!inQuote) {
+      // Only treat as quote if we are not already in a quote AND
+      // (it's the first char OR the previous char was a delimiter/whitespace that implies start of value)
+      // Actually for _findDelimiter, we assume we are scanning a value from the start.
+      // So we only enter quote mode if i === 0 or we are strictly at the start of a value.
+      // But _findDelimiter is generic. 
+      // Let's stick to: Only enter quote mode if we haven't seen non-whitespace content yet?
+      // But _findDelimiter doesn't track "seen content".
+      // Let's assume for _findDelimiter, if we hit a quote and we are NOT in a quote,
+      // it's a start quote ONLY IF it's at i=0. 
+      // Wait, what if we are parsing `key="val"`? _findDelimiter might be called on `"val"`.
+      // If we are parsing `key=val's`, _findDelimiter called on `val's`.
+      
+      if (!inQuote) {
+        // Only start quoting if we are at the beginning of the string (ignoring whitespace)
+        // Since we don't track whitespace easily here without lookbehind or extra state,
+        // let's check if the string up to i is empty/whitespace.
+        const prefix = text.substring(0, i);
+        if (prefix.trim().length === 0) {
           inQuote = true;
           quoteChar = char;
-        } else if (char === quoteChar) {
-          inQuote = false;
-          quoteChar = null;
         }
-      } else if (!inQuote && depth === 0 && char === delim) {
+      } else if (char === quoteChar) {
+        inQuote = false;
+        quoteChar = null;
+      }
+    } else if (!inQuote && depth === 0 && char === delim) {
         return i;
       }
 
@@ -981,15 +955,24 @@ export class ZonDecoder {
       }
 
       if (['"', "'"].includes(char)) {
-        if (!inQuote) {
+      if (!inQuote) {
+        // Only start quoting if the current token is empty or just whitespace
+        if (current.every(c => c.trim() === '')) {
           inQuote = true;
           quoteChar = char;
-        } else if (char === quoteChar) {
-          inQuote = false;
-          quoteChar = null;
+          current.push(char);
+        } else {
+          // Treat as literal quote inside a word
+          current.push(char);
         }
+      } else if (char === quoteChar) {
+        inQuote = false;
+        quoteChar = null;
         current.push(char);
-      } else if (!inQuote) {
+      } else {
+        current.push(char);
+      }
+    } else if (!inQuote) {
         if (['{', '['].includes(char)) {
           depth++;
           current.push(char);

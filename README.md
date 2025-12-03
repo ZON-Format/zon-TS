@@ -367,7 +367,7 @@ ZON treats the format as a first-class language:
 - 🎯 **JSON Data Model**: Encodes the same objects, arrays, and primitives as JSON with deterministic, lossless round-trips
 - 📐 **Minimal Syntax**: Explicit headers (`@(N)` for count, column list) eliminate ambiguity for LLMs
 - 🌊 **Streaming Support** (New): Process gigabytes of data with `ZonStreamEncoder`/`Decoder` – **Unique to ZON**
-- 📉 **Delta Encoding** (New): Sequential numbers are delta-encoded (`:delta`) for maximum compression – **Unique to ZON**
+
 - 🧠 **LLM Optimization** (New): Context-aware encoding (`encodeLLM`) reorders fields for optimal tokenization – **Unique to ZON**
 - 🌳 **Deep Nesting**: Handles complex nested structures efficiently (91% compression on 50-level deep objects)
 - 🌐 **Browser & Edge Ready**: Verified support for Cloudflare Workers, Vercel Edge, and Browsers
@@ -688,7 +688,7 @@ true,carol@example.com,3,"Carol White",editor
 
 ### 2. Compact Mode
 
-Maximum compression using tables, delta encoding, and abbreviations (`T`/`F` for booleans).
+Maximum compression using tables and abbreviations (`T`/`F` for booleans).
 
 ```typescript
 const result = encodeAdaptive(data, { mode: 'compact' });
@@ -850,7 +850,7 @@ company{departments{engineering{employees[{id:1,name:Alice}]},sales{employees[{i
 **Why flat is better:**
 1. **Tables work**: Uniform data → table format → massive token savings
 2. **Compression wins**: Repeated keys eliminated via column headers
-3. **Delta encoding**: Sequential IDs compressed (1, +1, +1 vs 1, 2, 3)
+3. **Dictionary compression**: Repeated strings stored once
 4. **LLM friendly**: Tabular data is easier for AI to parse and understand
 
 ### Mode Selection Guide
@@ -1199,12 +1199,12 @@ Comprehensive guides for every aspect of ZON:
 - **[Syntax Cheatsheet](./docs/syntax-cheatsheet.md)** - Quick reference guide
   - All ZON syntax at a glance
   - Primitives, objects, arrays, tables
-  - Special features (delta, dictionary, metadata)
+  - Special features (dictionary, metadata)
 
 ### 🚀 Feature Guides
 
 - **[Advanced Features](./docs/advanced-features.md)** - Optimization techniques
-  - Delta Encoding for sequential data
+
   - Dictionary Compression for repeated values
   - Type Coercion for LLM outputs
   - LLM-Aware Field Ordering

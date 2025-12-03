@@ -44,7 +44,7 @@ console.log("\n");
 // ==========================================
 // 3. LLM-OPTIMIZED MODE - Balance clarity & tokens
 // ==========================================
-console.log("3. LLM-OPT IMIZED MODE (balance clarity & tokens):");
+console.log("3. LLM-OPTIMIZED MODE (balance clarity & tokens):");
 console.log("--------------------------------------------------");
 const llmResult = encodeAdaptive(sampleData, { mode: 'llm-optimized' });
 console.log(llmResult);

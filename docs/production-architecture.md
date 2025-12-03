@@ -93,20 +93,17 @@ type UserV2 = {
 
 ## Adaptive Encoding Patterns
 
-### Automatic Mode Selection
-
-```typescript
-import { encodeAdaptive, recommendMode } from 'zon-format';
-
-// Get recommendation
-const rec = recommendMode(data);
-console.log(`Recommended: ${rec.mode} (${rec.confidence}% confident)`);
-console.log(`Reason: ${rec.reason}`);
-
-// Encode with auto mode
-const result = encodeAdaptive(data, { mode: 'auto' });
-console.log(`Used ${result.selectedMode} mode`);
-```
+### Mode Selection
+ 
+ ```typescript
+ import { encodeAdaptive } from 'zon-format';
+ 
+ // Encode with compact mode (default)
+ const compact = encodeAdaptive(data, { mode: 'compact' });
+ 
+ // Encode with readable mode for debugging
+ const readable = encodeAdaptive(data, { mode: 'readable' });
+ ```
 
 ### Use Case-Specific Modes
 
