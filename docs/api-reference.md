@@ -2,7 +2,7 @@
 
 Copyright (c) 2025 ZON-FORMAT (Roni Bhakta)
 
-Complete API documentation for `zon-format` v1.1.0.
+Complete API documentation for `zon-format` v1.3.0.
 
 ## Installation
 

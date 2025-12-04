@@ -2,7 +2,7 @@
 
 Copyright (c) 2025 ZON-FORMAT (Roni Bhakta)
 
-Quick reference for ZON format syntax. Cross-referenced with actual implementation in v1.1.0.
+Quick reference for ZON format syntax. Cross-referenced with actual implementation in v1.3.0.
 
 ## Basic Types
 

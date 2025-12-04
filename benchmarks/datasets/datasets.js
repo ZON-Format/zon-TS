@@ -7,11 +7,11 @@ const unifiedDataset = {
     tags: ["production", "critical", "web-cluster"]
   },
   users: [
-    { id: 1, name: "Alice Admin", role: "admin", active: true, loginCount: 154, lastLogin: "2025-02-01T08:30:00Z" },
-    { id: 2, name: "Bob Builder", role: "dev", active: true, loginCount: 89, lastLogin: "2025-02-01T09:15:00Z" },
-    { id: 3, name: "Charlie Check", role: "qa", active: false, loginCount: 42, lastLogin: "2025-01-28T14:20:00Z" },
-    { id: 4, name: "Dave Deploy", role: "ops", active: true, loginCount: 210, lastLogin: "2025-02-01T07:45:00Z" },
-    { id: 5, name: "Eve External", role: "guest", active: true, loginCount: 5, lastLogin: "2025-02-01T10:00:00Z" }
+    { id: 1, name: "Alice Admin", role: "admin", active: true, loginCount: 154, lastLogin: "2025-02-01T08:30:00.000Z" },
+    { id: 2, name: "Bob Builder", role: "dev", active: true, loginCount: 89, lastLogin: "2025-02-01T09:15:00.000Z" },
+    { id: 3, name: "Charlie Check", role: "qa", active: false, loginCount: 42, lastLogin: "2025-01-28T14:20:00.000Z" },
+    { id: 4, name: "Dave Deploy", role: "ops", active: true, loginCount: 210, lastLogin: "2025-02-01T07:45:00.000Z" },
+    { id: 5, name: "Eve External", role: "guest", active: true, loginCount: 5, lastLogin: "2025-02-01T10:00:00.000Z" }
   ],
   config: {
     database: {
@@ -40,12 +40,12 @@ const unifiedDataset = {
     }
   },
   logs: [
-    { id: 101, timestamp: "2025-02-01T10:00:00Z", level: "INFO", message: "System startup", source: "kernel" },
-    { id: 102, timestamp: "2025-02-01T10:00:05Z", level: "INFO", message: "Database connected", source: "db-pool", latency: 12 },
-    { id: 103, timestamp: "2025-02-01T10:01:20Z", level: "WARN", message: "High memory usage", source: "monitor", usage: 85 },
-    { id: 104, timestamp: "2025-02-01T10:05:00Z", level: "ERROR", message: "Connection timeout", source: "api-gateway", requestId: "req-abc-123" },
-    { id: 105, timestamp: "2025-02-01T10:10:00Z", level: "INFO", message: "Scheduled backup started", source: "backup-service" },
-    { id: 106, timestamp: "2025-02-01T10:15:00Z", level: "INFO", message: "Scheduled backup completed", source: "backup-service", duration: 300 }
+    { id: 101, timestamp: "2025-02-01T10:00:00.000Z", level: "INFO", message: "System startup", source: "kernel" },
+    { id: 102, timestamp: "2025-02-01T10:00:05.000Z", level: "INFO", message: "Database connected", source: "db-pool", latency: 12 },
+    { id: 103, timestamp: "2025-02-01T10:01:20.000Z", level: "WARN", message: "High memory usage", source: "monitor", usage: 85 },
+    { id: 104, timestamp: "2025-02-01T10:05:00.000Z", level: "ERROR", message: "Connection timeout", source: "api-gateway", requestId: "req-abc-123" },
+    { id: 105, timestamp: "2025-02-01T10:10:00.000Z", level: "INFO", message: "Scheduled backup started", source: "backup-service" },
+    { id: 106, timestamp: "2025-02-01T10:15:00.000Z", level: "INFO", message: "Scheduled backup completed", source: "backup-service", duration: 300 }
   ],
   products: [
     { id: "p1", name: "Wireless Headphones", price: 99.99, category: "Electronics", inStock: true, tags: ["audio", "bluetooth", "sale"] },

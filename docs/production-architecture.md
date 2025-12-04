@@ -37,7 +37,7 @@ This guide provides comprehensive patterns and best practices for deploying ZON 
 | **Caching** | ZON Text | Fast decode for LLMs |
 | **Logging** | ZON Text | Human-readable |
 
-## Versioning Workflows
+## Version: 1.3.0 Workflows
 
 ### Schema Evolution Pattern
 

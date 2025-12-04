@@ -1,6 +1,6 @@
 # Advanced Features Guide
 
-**Version:** 1.1.0  
+**Version:** 1.3.0  
 **Status:** Stable
 
 ## Overview
@@ -14,6 +14,8 @@ ZON includes advanced compression and optimization features that dramatically re
 - [Type Coercion](#type-coercion)
 - [LLM-Aware Field Ordering](#llm-aware-field-ordering)
 - [Hierarchical Sparse Encoding](#hierarchical-sparse-encoding)
+- [Adaptive Encoding](#adaptive-encoding)
+- [Binary Format](#binary-format)
 
 ---
 
@@ -304,13 +306,93 @@ const data = {
 
 ---
 
+## Adaptive Encoding
+
+**Introduced:** v1.2.0  
+**Purpose:** Automatically select the best encoding mode based on data complexity
+
+### The Problem
+
+Different data structures benefit from different encoding strategies. A deeply nested config file might be better suited for a readable format, while a large table of uniform data needs compact encoding.
+
+### The Solution
+
+`encodeAdaptive` analyzes your data and selects the optimal mode:
+
+```typescript
+import { encodeAdaptive } from 'zon-format';
+
+const data = { ... };
+
+// Automatically selects mode
+const zon = encodeAdaptive(data);
+```
+
+### Modes
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| `auto` | Analyzes data and picks best mode | General purpose |
+| `compact` | Maximizes compression (default ZON) | Large datasets, API payloads |
+| `readable` | Adds indentation and whitespace | Config files, debugging |
+| `llm-optimized` | Optimizes for retrieval/generation | LLM prompts |
+
+### Complexity Analysis
+
+You can also analyze data complexity directly:
+
+```typescript
+import { DataComplexityAnalyzer } from 'zon-format';
+
+const analyzer = new DataComplexityAnalyzer();
+const metrics = analyzer.analyze(data);
+
+console.log(metrics.score); // 0-100 complexity score
+console.log(metrics.recommendation); // 'compact', 'readable', etc.
+```
+
+---
+
+## Binary Format
+
+**Introduced:** v1.2.0  
+**Purpose:** Maximum space efficiency for storage and internal APIs
+
+### Overview
+
+ZON Binary (ZON-B) is a compact, binary serialization format inspired by MessagePack but optimized for ZON's data model. It uses a magic header `ZNB\x01`.
+
+### Usage
+
+```typescript
+import { encodeBinary, decodeBinary } from 'zon-format';
+
+const data = { id: 1, name: "Alice" };
+
+// Encode to Uint8Array
+const binary = encodeBinary(data);
+
+// Decode back to object
+const decoded = decodeBinary(binary);
+```
+
+### Performance
+
+| Metric | JSON | ZON Text | ZON Binary |
+|--------|------|----------|------------|
+| Size | 100% | ~84% | **~40-60%** |
+| Parse Speed | Fast | Medium | **Fastest** |
+| Human Readable | Yes | Yes | No |
+
+---
+
 ## Performance Tips
 
 
-2. **Dictionary compression**: Best for categorical data (status, roles, countries)
-3. **Type coercion**: Enable when dealing with LLM outputs
-4. **Field ordering**: Use for retrieval-heavy applications
-5. **Sparse encoding**: Automatic, no configuration needed
+1. **Dictionary compression**: Best for categorical data (status, roles, countries)
+2. **Type coercion**: Enable when dealing with LLM outputs
+3. **Field ordering**: Use for retrieval-heavy applications
+4. **Sparse encoding**: Automatic, no configuration needed
 
 ## See Also
 

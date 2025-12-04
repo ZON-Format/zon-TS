@@ -1,5 +1,7 @@
 # ZON Best Practices
 
+**Version:** 1.3.0
+
 ## Encoding Mode Selection
 
 Choose the right encoding mode for your use case to balance token efficiency, readability, and LLM comprehension.

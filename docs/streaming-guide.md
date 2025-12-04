@@ -1,6 +1,6 @@
 # Streaming Guide
 
-**Version:** 1.1.0  
+**Version:** 1.3.0  
 **Status:** Stable
 
 ## Overview

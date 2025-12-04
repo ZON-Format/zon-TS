@@ -966,9 +966,16 @@ export class ZonDecoder {
           current.push(char);
         }
       } else if (char === quoteChar) {
-        inQuote = false;
-        quoteChar = null;
-        current.push(char);
+        if (i + 1 < text.length && text[i+1] === quoteChar) {
+          // Handle escaped quote ("" or '')
+          current.push(char);
+          current.push(text[i+1]);
+          i++;
+        } else {
+          inQuote = false;
+          quoteChar = null;
+          current.push(char);
+        }
       } else {
         current.push(char);
       }

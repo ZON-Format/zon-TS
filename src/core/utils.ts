@@ -40,8 +40,19 @@ export function parseValue(val: string): any {
     try {
       return JSON.parse(trimmed);
     } catch {
-      if (trimmed.endsWith('"')) {
-        return trimmed.slice(1, -1).replace(/""/g, '"');
+      // Handle ZON-style double quoting ("") combined with JSON escapes
+      try {
+        if (trimmed.endsWith('"')) {
+          const inner = trimmed.slice(1, -1);
+          // Replace "" with \" for JSON compatibility
+          const fixed = inner.replace(/""/g, '\\"');
+          return JSON.parse(`"${fixed}"`);
+        }
+      } catch {
+        // Fallback: just unquote and unescape quotes, ignoring other escapes
+        if (trimmed.endsWith('"')) {
+          return trimmed.slice(1, -1).replace(/""/g, '"');
+        }
       }
     }
   }
