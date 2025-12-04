@@ -76,7 +76,7 @@ export class ZonDecoder {
     let pendingDictionaries = new Map<string, string[]>();
 
     for (let i = 0; i < lines.length; i++) {
-      this.currentLine = i + 1; // Update current line number for error reporting
+      this.currentLine = i + 1;
       const line = lines[i];
       const trimmedLine = line.trimEnd();
 
@@ -158,20 +158,20 @@ export class ZonDecoder {
              val = trimmedLine.substring(splitIdx).trim();
           }
           
-          // Check for multiline value (indented block)
+
           if (!val && !trimmedLine.trim().endsWith('{') && !trimmedLine.trim().endsWith('[')) {
              const currentIndent = line.search(/\S/);
              if (i + 1 < lines.length) {
                 const nextIndent = lines[i+1].search(/\S/);
                 if (nextIndent > currentIndent) {
-                   // Consume indented block
+
                    const blockLines: string[] = [];
                    while (i + 1 < lines.length) {
                       const nextLine = lines[i+1];
                       
-                      // Check for empty lines
+
                       if (!nextLine.trim()) {
-                         // Preserve empty lines as they might be separators
+
                          blockLines.push('');
                          i++;
                          this.currentLine = i + 1;
@@ -185,12 +185,12 @@ export class ZonDecoder {
                       i++;
                       this.currentLine = i + 1;
                    }
-                   // Normalize indentation: strip the base indent from all lines
+
                    const normalizedLines = blockLines.map((line, idx) => {
-                     if (!line.trim()) return line; // Preserve empty lines
+                     if (!line.trim()) return line;
                      const lineIndent = line.search(/\S/);
-                     if (lineIndent === -1) return line; // No content
-                     // Strip nextIndent characters (the base indentation of the block)
+                     if (lineIndent === -1) return line;
+
                      return lineIndent >= nextIndent ? line.substring(nextIndent) : line;
                    });
                    val = normalizedLines.join('\n');

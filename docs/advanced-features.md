@@ -306,7 +306,7 @@ const data = {
 
 ## Performance Tips
 
-1. **Dictionary compression**: Best for repetitive strings (enums, categories)
+
 2. **Dictionary compression**: Best for categorical data (status, roles, countries)
 3. **Type coercion**: Enable when dealing with LLM outputs
 4. **Field ordering**: Use for retrieval-heavy applications

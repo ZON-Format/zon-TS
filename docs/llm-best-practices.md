@@ -19,7 +19,7 @@ Choose the right ZON mode for your LLM workflow:
 | **RAG context** | `llm-optimized` | Balances clarity and efficiency |
 | **Function calling** | `compact` | Minimal tokens |
 | **Human review needed** | `readable` | YAML-like, easy to verify |
-| **Mixed/unknown** | `auto` | Adapts automatically |
+
 
 ### Token Impact Examples
 

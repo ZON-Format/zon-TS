@@ -32,7 +32,7 @@ export class ZonMigrationManager {
    * @example
    * ```typescript
    * manager.registerMigration("1.0.0", "2.0.0", (data) => {
-   *   // Add new 'email' field with default value
+
    *   if (data.users) {
    *     data.users = data.users.map(u => ({ ...u, email: `${u.name}@example.com` }));
    *   }
@@ -66,7 +66,7 @@ export class ZonMigrationManager {
       return data;
     }
     
-    // Try direct migration
+
     const directKey = `${fromVersion}->${toVersion}`;
     if (this.migrations.has(directKey)) {
       const migration = this.migrations.get(directKey)!;
@@ -74,14 +74,14 @@ export class ZonMigrationManager {
       return migration.migrate(data, fromVersion, toVersion);
     }
     
-    // Find migration path
+
     const path = this.findMigrationPath(fromVersion, toVersion);
     
     if (!path || path.length === 0) {
       throw new Error(`No migration path found from ${fromVersion} to ${toVersion}`);
     }
     
-    // Apply migrations sequentially
+
     let current = data;
     for (const migration of path) {
       console.log(`Migrating ${migration.from} → ${migration.to}: ${migration.description || 'no description'}`);
@@ -115,7 +115,7 @@ export class ZonMigrationManager {
       
       visited.add(version);
       
-      // Find all migrations starting from current version
+
       for (const [key, migration] of this.migrations) {
         if (migration.from === version) {
           queue.push({
@@ -196,12 +196,12 @@ export function createAddFieldMigration(
     let current = data;
     for (const key of keys) {
       if (!(key in current)) {
-        return data; // Path doesn't exist, skip
+        return data;
       }
       current = current[key];
     }
     
-    // Add field if it's an array
+
     if (Array.isArray(current)) {
       return {
         ...data,
@@ -212,7 +212,7 @@ export function createAddFieldMigration(
       };
     }
     
-    // Add field to object
+
     if (typeof current === 'object' && current !== null) {
       current[lastKey] = defaultValue;
     }

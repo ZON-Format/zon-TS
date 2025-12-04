@@ -29,7 +29,7 @@ export class TypeInferrer {
           JSON.parse(trimmed);
           return { type: 'json', coercible: true, original: 'string' };
         } catch (e) {
-          // Not valid JSON
+
         }
       }
     }
@@ -119,7 +119,7 @@ export class TypeInferrer {
   }
 
   private _isJSON(v: any): boolean {
-    if (typeof v === 'object') return true; // Already object/array
+    if (typeof v === 'object') return true;
     if (typeof v === 'string') {
       const trimmed = v.trim();
       if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || 
@@ -136,7 +136,7 @@ export class TypeInferrer {
   }
 
   private _isISODate(s: string): boolean {
-    // Simple ISO 8601 check: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+
     return /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?(Z|[-+]\d{2}:?\d{2})?)?$/.test(s);
   }
 }

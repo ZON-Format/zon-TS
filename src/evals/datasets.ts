@@ -26,7 +26,7 @@ export class DatasetRegistry {
       return this.datasets.get(`${id}@${version}`) || null;
     }
     
-    // Get latest version if no version specified
+
     const matching = Array.from(this.datasets.values())
       .filter(d => d.id === id)
       .sort((a, b) => this.compareVersions(b.version, a.version));

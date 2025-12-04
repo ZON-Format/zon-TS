@@ -52,19 +52,19 @@ export function prettyPrint(zon: string, options: PrinterOptions = {}): string {
     return zon;
   }
   
-  // Simple syntax highlighting
+
   let highlighted = zon
-    // Strings
+
     .replace(/"([^"]*)"/g, useColors ? `${colors.green}"$1"${colors.reset}` : '"$1"')
-    // Numbers
+
     .replace(/\b(\d+(\.\d+)?)\b/g, useColors ? `${colors.cyan}$1${colors.reset}` : '$1')
-    // Booleans
+
     .replace(/\b(true|false)\b/g, useColors ? `${colors.yellow}$1${colors.reset}` : '$1')
-    // null
+
     .replace(/\bnull\b/g, useColors ? `${colors.dim}null${colors.reset}` : 'null')
-    // Keys (field names)
+
     .replace(/^(\s*)(\w+):/gm, useColors ? `$1${colors.blue}$2${colors.reset}:` : '$1$2:')
-    // Comments
+
     .replace(/(\/\/.*$)/gm, useColors ? `${colors.gray}$1${colors.reset}` : '$1');
   
   if (lineNumbers) {

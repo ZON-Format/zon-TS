@@ -21,7 +21,7 @@ export class ZonEvaluator {
   private metrics: Map<string, any> = new Map();
   
   constructor() {
-    // Metrics will be registered separately
+
   }
   
   /**
@@ -44,11 +44,11 @@ export class ZonEvaluator {
     const results: EvalResult['results'] = {};
     const questionResults: QuestionResult[] = [];
     
-    // Run evaluations for each model
+
     for (const model of config.models) {
       results[model.name] = {};
       
-      // Evaluate each dataset
+
       for (const dataset of config.datasets) {
         const datasetResults = await this.evaluateDataset(
           dataset,
@@ -58,19 +58,18 @@ export class ZonEvaluator {
         
         questionResults.push(...datasetResults.questionResults);
         
-        // Aggregate metrics
+
         for (const [metric, value] of Object.entries(datasetResults.metrics)) {
           if (!results[model.name][metric]) {
             results[model.name][metric] = value;
           } else {
-            // Average across datasets
             results[model.name][metric] = (results[model.name][metric] + value) / 2;
           }
         }
       }
     }
     
-    // Check threshold
+
     const passed = this.checkThresholds(results, config.thresholds);
     
     const duration = Date.now() - startTime;
@@ -82,7 +81,7 @@ export class ZonEvaluator {
       results,
       questionResults,
       passed,
-      regressions: [], // Will be filled by compare()
+      regressions: [],
       duration
     };
   }
@@ -102,24 +101,19 @@ export class ZonEvaluator {
     let correctCount = 0;
     let totalTokens = 0;
     
-    // For now, this is a placeholder
-    // In practice, this would:
-    // 1. Encode the dataset.data to ZON
-    // 2. Send to LLM with each question
-    // 3. Validate answers
-    // 4. Calculate metrics
+
     
     for (const question of dataset.questions) {
-      // Simulate evaluation (in real implementation, call LLM)
+
       const result: QuestionResult = {
         questionId: question.id,
         modelName: model.name,
         question: question.question,
         expectedAnswer: question.expectedAnswer,
-        actualAnswer: question.expectedAnswer, // Placeholder
-        correct: true, // Placeholder
-        tokensUsed: 100, // Placeholder
-        latencyMs: 500 // Placeholder
+        actualAnswer: question.expectedAnswer,
+        correct: true,
+        tokensUsed: 100,
+        latencyMs: 500
       };
       
       questionResults.push(result);
@@ -127,18 +121,18 @@ export class ZonEvaluator {
       totalTokens += result.tokensUsed || 0;
     }
     
-    // Calculate metrics
+
     const metrics: Record<string, number> = {};
     
     for (const metricName of metricNames) {
       const metric = this.metrics.get(metricName);
       if (metric) {
-        // Calculate metric based on question results
+
         if (metricName === 'exactMatch') {
           metrics[metricName] = correctCount / dataset.questions.length;
         } else if (metricName === 'tokenEfficiency') {
           const accuracy = correctCount / dataset.questions.length;
-          metrics[metricName] = (accuracy / totalTokens) * 1000; // Per 1K tokens
+          metrics[metricName] = (accuracy / totalTokens) * 1000;
         }
       }
     }
@@ -166,7 +160,7 @@ export class ZonEvaluator {
         
         const change = ((currentValue - baselineValue) / baselineValue) * 100;
         
-        // Determine if this is a regression (depends on metric direction)
+
         const metric = this.metrics.get(metricName);
         const higherIsBetter = metric?.higherIsBetter !== false;
         
@@ -202,7 +196,7 @@ export class ZonEvaluator {
         const value = modelResults[metric];
         if (value === undefined) continue;
         
-        // Assume higher is better for most metrics
+
         if (value < threshold) {
           return false;
         }

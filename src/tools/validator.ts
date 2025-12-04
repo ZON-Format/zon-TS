@@ -58,7 +58,7 @@ export class ZonValidator {
     const warnings: ValidationWarning[] = [];
     const suggestions: string[] = [];
     
-    // Try to decode
+
     let data: any;
     try {
       data = decode(zon);
@@ -71,10 +71,10 @@ export class ZonValidator {
       };
     }
     
-    // Perform linting checks
+
     const stats = analyze(data);
     
-    // Check depth
+
     if (options.maxDepth && stats.depth > options.maxDepth) {
       warnings.push({
         path: 'root',
@@ -85,7 +85,7 @@ export class ZonValidator {
       suggestions.push('Consider flattening deeply nested structures');
     }
     
-    // Check field count
+
     if (options.maxFields && stats.fieldCount > options.maxFields) {
       warnings.push({
         path: 'root',
@@ -96,7 +96,7 @@ export class ZonValidator {
       suggestions.push('Consider breaking large objects into smaller ones');
     }
     
-    // Performance checks
+
     if (options.checkPerformance) {
       if (stats.arrayCount > 100) {
         warnings.push({
@@ -118,7 +118,7 @@ export class ZonValidator {
       }
     }
     
-    // Schema validation
+
     if (options.schema) {
       try {
         const result = options.schema.parse(data);
@@ -140,14 +140,14 @@ export class ZonValidator {
       }
     }
     
-    // Round-trip validation
+
     try {
       const roundtrip = encode(decode(zon));
       if (roundtrip !== zon.trim()) {
         suggestions.push('ZON format may not be optimal - consider reformatting');
       }
     } catch {
-      // Already caught decode error above
+
     }
     
     return {

@@ -1,6 +1,6 @@
 {
   "name": "zon-format",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "ZON: The most token-efficient serialization format for LLMs - beats CSV, TOON, JSON, and all competitors",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -18,7 +18,7 @@
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
-    "generate:examples": "node scripts/generate_examples.js",
+    "generate:examples": "npx ts-node scripts/generate_mode_examples.ts",
     "benchmark": "node benchmarks/scripts/run.js",
     "benchmark:comprehensive": "node benchmarks/scripts/comprehensive-benchmark.js",
     "benchmark:accuracy": "node benchmarks/scripts/retrieval-accuracy.js",

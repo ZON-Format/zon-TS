@@ -69,17 +69,17 @@ export class DataComplexityAnalyzer {
       fieldCounts: [] as number[]
     };
     
-    // Start traversal at depth 1 (root level)
+
     this.traverse(data, 1, stats);
     
-    // Calculate irregularity score
+
     const irregularity = this.calculateIrregularity(stats.keySets);
     
-    // Calculate array density
+
     const total = stats.arrayCount + stats.objectCount;
     const arrayDensity = total > 0 ? stats.arrayCount / total : 0;
     
-    // Avg fields per object
+
     const avgFieldsPerObject = stats.fieldCounts.length > 0
       ? stats.fieldCounts.reduce((a, b) => a + b, 0) / stats.fieldCounts.length
       : 0;
@@ -98,7 +98,7 @@ export class DataComplexityAnalyzer {
    * Traverses data structure to collect statistics.
    */
   private traverse(data: any, depth: number, stats: any): void {
-    // Always count at least depth 1 for non-null objects
+
     if (typeof data === 'object' && data !== null) {
       stats.maxNesting = Math.max(stats.maxNesting, depth);
     }
@@ -167,7 +167,7 @@ export class DataComplexityAnalyzer {
     confidence: number;
     reason: string;
   } {
-    // Deep nesting → inline format
+
    if (metrics.nesting > 4) {
       return {
         recommendation: 'inline',
@@ -176,7 +176,7 @@ export class DataComplexityAnalyzer {
       };
     }
     
-    // Highly irregular → JSON format
+
     if (metrics.irregularity > 0.7) {
       return {
         recommendation: 'json',
@@ -185,7 +185,7 @@ export class DataComplexityAnalyzer {
       };
     }
     
-    // Large uniform arrays → table format (HIGH PRIORITY)
+
     if (metrics.arraySize >= 3 && metrics.irregularity < 0.3) {
       return {
         recommendation: 'table',
@@ -194,7 +194,7 @@ export class DataComplexityAnalyzer {
       };
     }
     
-    // Mixed characteristics → mixed format
+
     if (metrics.nesting > 2 && metrics.arrayDensity > 0.3) {
       return {
         recommendation: 'mixed',
@@ -203,7 +203,7 @@ export class DataComplexityAnalyzer {
       };
     }
     
-    // Default: table for moderate complexity
+
     return {
       recommendation: 'table',
       confidence: 0.6,

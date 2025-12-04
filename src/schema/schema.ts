@@ -460,7 +460,7 @@ class ZonArray<T> extends ZonSchema<T[]> {
     for (let i = 0; i < data.length; i++) {
       const itemResult = this.elementSchema.parse(data[i], [...path, i]);
       if (!itemResult.success) {
-        return itemResult; // Return first error found
+        return itemResult;
       }
       result.push(itemResult.data);
     }

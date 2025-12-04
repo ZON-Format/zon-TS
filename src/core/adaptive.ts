@@ -9,7 +9,7 @@ import { DataComplexityAnalyzer, type ComplexityMetrics } from './analyzer';
 import { TABLE_MARKER } from './constants';
 import { expandPrint } from '../tools/printer';
 
-// Re-export analyzer for convenience
+
 export { DataComplexityAnalyzer, type ComplexityMetrics, type AnalysisResult } from './analyzer';
 
 export type EncodingMode = 'compact' | 'readable' | 'llm-optimized';
@@ -77,7 +77,7 @@ export class AdaptiveEncoder {
     const mode = options?.mode || 'compact';
     const decisions: string[] = [];
     
-    // Analyze data complexity
+
     const analysis = this.analyzer.analyze(data);
     const metrics = analysis;
     

@@ -13,7 +13,7 @@ export const exactMatch: Metric = {
   name: 'exactMatch',
   description: 'Percentage of questions answered exactly correctly',
   compute: (expected: any, actual: any, context?: MetricContext): number => {
-    // Normalize for comparison
+
     const normalizedExpected = JSON.stringify(expected);
     const normalizedActual = JSON.stringify(actual);
     
@@ -33,7 +33,7 @@ export const tokenEfficiency: Metric = {
     const accuracy = isCorrect ? 1.0 : 0.0;
     const tokens = context?.tokens || 1;
     
-    // Return accuracy per 1K tokens
+
     return (accuracy / tokens) * 1000;
   },
   higherIsBetter: true
@@ -47,7 +47,7 @@ export const structuralValidity: Metric = {
   description: 'Percentage of responses that match the expected schema',
   compute: (expected: any, actual: any, context?: MetricContext): number => {
     if (!context?.schema) {
-      // No schema to validate against
+
       return 1.0;
     }
     
@@ -69,7 +69,7 @@ export const formatCorrectness: Metric = {
   description: 'Percentage of responses that parse as valid ZON',
   compute: (expected: any, actual: any, context?: MetricContext): number => {
     if (typeof actual !== 'string') {
-      // If actual is already parsed, assume it was valid
+
       return 1.0;
     }
     
@@ -120,24 +120,20 @@ export const hallucination: Metric = {
   description: 'Score indicating likelihood of hallucination (0 = no hallucination, 1 = definite hallucination)',
   compute: async (expected: any, actual: any, context?: MetricContext): Promise<number> => {
     // Placeholder implementation
-    // In real usage, this would:
-    // 1. Build a prompt asking if `actual` hallucinates given `context.sourceData`
-    // 2. Call an LLM judge (e.g., GPT-4)
-    // 3. Parse the judge's response
-    // 4. Return hallucination score
+
     
-    // For now, simple heuristic: check if actual contains data not in source
+
     if (!context?.sourceData) return 0.0;
     
     const sourceStr = JSON.stringify(context.sourceData).toLowerCase();
     const actualStr = JSON.stringify(actual).toLowerCase();
     
-    // Very basic check - in real implementation, use LLM
+
     const containsSourceData = sourceStr.includes(actualStr.substring(0, Math.min(50, actualStr.length)));
     
-    return containsSourceData ? 0.0 : 0.3; // Placeholder score
+    return containsSourceData ? 0.0 : 0.3;
   },
-  higherIsBetter: false // Lower hallucination is better
+  higherIsBetter: false
 };
 
 /**
@@ -149,7 +145,7 @@ export const latency: Metric = {
   compute: (expected: any, actual: any, context?: MetricContext): number => {
     return context?.latencyMs || 0;
   },
-  higherIsBetter: false // Lower latency is better
+  higherIsBetter: false
 };
 
 /**

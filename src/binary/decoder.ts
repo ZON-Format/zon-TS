@@ -31,10 +31,10 @@ export class BinaryZonDecoder {
     this.buffer = buffer;
     this.offset = 0;
     
-    // Verify magic header
+
     this.verifyMagicHeader();
     
-    // Decode the value
+
     return this.decodeValue();
   }
   
@@ -55,32 +55,32 @@ export class BinaryZonDecoder {
   private decodeValue(): any {
     const marker = this.buffer[this.offset++];
     
-    // Positive fixint
+
     if (isPositiveFixint(marker)) {
       return marker;
     }
     
-    // Negative fixint
+
     if (isNegativeFixint(marker)) {
       return marker - 256;
     }
     
-    // Fixmap
+
     if (isFixmap(marker)) {
       return this.decodeMap(getFixmapSize(marker));
     }
     
-    // Fixarray
+
     if (isFixarray(marker)) {
       return this.decodeArray(getFixarraySize(marker));
     }
     
-    // Fixstr
+
     if (isFixstr(marker)) {
       return this.decodeString(getFixstrSize(marker));
     }
     
-    // Other types
+
     switch (marker) {
       case TypeMarker.NIL:
         return null;
@@ -192,7 +192,7 @@ export class BinaryZonDecoder {
       (this.buffer[this.offset + 1] << 16) |
       (this.buffer[this.offset + 2] << 8) |
       this.buffer[this.offset + 3]
-    ) >>> 0; // Unsigned
+    ) >>> 0;
     this.offset += 4;
     return value;
   }
@@ -227,7 +227,7 @@ export class BinaryZonDecoder {
       view.setUint8(i, this.buffer[this.offset++]);
     }
     
-    return view.getFloat32(0, false); // big-endian
+    return view.getFloat32(0, false);
   }
   
   private readFloat64(): number {
@@ -238,7 +238,7 @@ export class BinaryZonDecoder {
       view.setUint8(i, this.buffer[this.offset++]);
     }
     
-    return view.getFloat64(0, false); // big-endian
+    return view.getFloat64(0, false);
   }
 }
 

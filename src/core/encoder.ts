@@ -37,7 +37,7 @@ export interface EncodeOptions {
   enableTypeCoercion?: boolean;
   /** Embed version metadata in output (default: false) */
   embedMetadata?: boolean;
-  /** Version string to embed (default: "1.1.0") */
+  /** Version string to embed (default: "1.3.0") */
   version?: string;
   /** Schema ID to embed */
   schemaId?: string;
@@ -46,7 +46,7 @@ export interface EncodeOptions {
 }
 
 /**
- * Encodes data structures into ZON format v1.1.0.
+ * Encodes data structures into ZON format v1.3.0.
  */
 export class ZonEncoder {
   private anchor_interval: number;
@@ -85,7 +85,7 @@ export class ZonEncoder {
     if (options?.embedMetadata) {
       processedData = embedVersion(
         data,
-        options.version || '1.1.0',
+        options.version || '1.3.0',
         options.schemaId
       );
     }
@@ -102,7 +102,7 @@ export class ZonEncoder {
 
     const [streams, metadata] = this._extractStreams(processedData);
 
-    // If no streams and no metadata, format as node
+
     if (streams.size === 0 && (!metadata || Object.keys(metadata).length === 0)) {
       if (typeof data === 'object' && data !== null) {
         if (!Array.isArray(data) && Object.keys(data).length === 0) {
@@ -113,7 +113,7 @@ export class ZonEncoder {
       return JSON.stringify(data);
     }
 
-    // Check for high irregularity in root-level array
+
     if (Array.isArray(data) && data.length > 0 && data.every(item => typeof item === 'object' && !Array.isArray(item))) {
       const irregularityScore = this._calculateIrregularity(data);
       
@@ -124,14 +124,14 @@ export class ZonEncoder {
 
     const output: string[] = [];
 
-    // Write metadata first
+
     if (metadata && Object.keys(metadata).length > 0) {
       output.push(...this._writeMetadata(metadata));
     }
 
-    // Write all streams as tables
+
     const streamEntries = Array.from(streams.entries()).sort((a, b) => {
-      // Sort by key name for consistency
+
       return a[0].localeCompare(b[0]);
     });
 
@@ -156,7 +156,7 @@ export class ZonEncoder {
   private _extractStreams(data: any): [Map<string, any[]>, Record<string, any>] {
     if (Array.isArray(data)) {
       if (data.length > 0 && typeof data[0] === 'object' && data[0] !== null && !Array.isArray(data[0])) {
-        // Root-level array of objects - treat as single unnamed stream
+
         const streams = new Map<string, any[]>();
         streams.set('', data);
         return [streams, {}];
@@ -170,17 +170,17 @@ export class ZonEncoder {
       const metadata: Record<string, any> = {};
       
       for (const [k, v] of Object.entries(data)) {
-        // Check if this is an array of objects (potential table)
+
         if (Array.isArray(v) && v.length > 0) {
           if (typeof v[0] === 'object' && v[0] !== null && !Array.isArray(v[0])) {
-            // This is a uniform array - should become a table
+
             streams.set(k, v);
           } else {
-            // Array of primitives - goes to metadata
+
             metadata[k] = v;
           }
         } else {
-          // Non-array field - goes to metadata
+
           metadata[k] = v;
         }
       }

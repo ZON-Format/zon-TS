@@ -67,7 +67,7 @@ ZON supports multiple encoding modes for different use cases:
 
 | Mode | Boolean Format | Table Compression | Indentation | Best For |
 |------|----------------|-------------------|-------------|----------|
-| **auto** | `T`/`F` | ✅ Yes | No | General purpose |
+
 | **compact** | `T`/`F` | ✅ Yes | No | Production APIs |
 | **readable** | `true`/`false` | ❌ No | ✅ Yes | Config files |
 | **llm-optimized** | `true`/`false` | ✅ Yes | Optional | AI workflows |
@@ -206,16 +206,7 @@ users:@(2):id,name,active
 2,Bob,F
 ```
 
-### Delta Encoding (v1.1.0)
 
-```zonf
-timeseries:@(3):ts:delta,val
-1000,10
-+60,12
-+60,15
-```
-
-**Best practice**: Always include count `@(N)` for explicit schema
 
 ### Dictionary Compression (v1.1.0)
 

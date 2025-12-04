@@ -11,7 +11,7 @@ Choose the right encoding mode for your use case to balance token efficiency, re
 | Production APIs | `compact` | Maximum token efficiency |
 | Config files | `readable` | Human-editable, git-friendly |
 | LLM prompts | `llm-optimized` | Best AI understanding |
-| Mixed/unknown data | `auto` | Adapts automatically |
+
 | Development/debugging | `readable` | Easiest inspection |
 | Caching for LLMs | `compact` or `llm-optimized` | Token efficiency + clarity |
 
@@ -29,8 +29,7 @@ const configFile = encodeAdaptive(config, { mode: 'readable', indent: 2 });
 // For LLM prompts (best comprehension)
 const llmPrompt = encodeAdaptive(context, { mode: 'llm-optimized' });
 
-// Let ZON decide
-const adaptive = encodeAdaptive(unknownData, { mode: 'auto' });
+
 ```
 
 ---
@@ -89,7 +88,7 @@ company{departments{engineering{employees[{id:1,name:Alice,role:Senior}]},sales{
 
 1. **Table Format Works**: Uniform data → table encoding → massive token savings
 2. **Key Compression**: Repeated keys eliminated via column headers
-3. **Delta Encoding**: Sequential IDs compressed efficiently (1, +1, +1)
+
 4. **LLM Friendly**: Tabular data is easier for AI to parse
 5. **human Readable**: Even compact mode is clearer with tables
 

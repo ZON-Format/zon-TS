@@ -10,7 +10,7 @@ export function quoteString(s: string): string {
   
   if (/^[a-zA-Z0-9_\-\.]+$/.test(s)) return s;
   
-  // Smart quoting: use single quotes if string contains double quotes but no single quotes or newlines
+
   if (s.includes('"') && !s.includes("'") && !s.includes('\n') && !s.includes('\r')) {
     return `'${s}'`;
   }

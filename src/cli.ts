@@ -212,8 +212,8 @@ try {
       }
       
       process.exit(result.valid ? 0 : 1);
+
     } else {
-      // Simple validation
       try {
         decode(content);
         console.log('✅ Valid ZON file.');

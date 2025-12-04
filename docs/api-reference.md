@@ -87,10 +87,10 @@ F,2,Bob
  
  ### `encodeAdaptive(input: any, options?: AdaptiveOptions): string | AdaptiveResult`
  
- Automatically selects the best encoding mode based on data complexity and user preferences.
+ Encodes data using the specified mode (default: 'compact').
  
  **Options:**
- - `mode`: `'auto' | 'compact' | 'readable' | 'llm-optimized'` (default: `'auto'`)
+ - `mode`: `'compact' | 'readable' | 'llm-optimized'` (default: `'compact'`)
  - `indent`: `number` - Indentation spaces for readable mode (default: `2`)
  - `debug`: `boolean` - Return detailed analysis (default: `false`)
  
@@ -100,8 +100,7 @@ F,2,Bob
  
  | Mode | Description | Best For |
  |------|-------------|----------|
- | `auto` | Analyzes data and picks best mode automatically | General purpose, mixed data |
- | `compact` | Maximum compression (tables, T/F, delta encoding) | Production APIs, token efficiency |
+ | `compact` | Maximum compression (tables, T/F) | Production APIs, token efficiency |
  | `readable` | YAML-like syntax with indentation | Config files, human editing |
  | `llm-optimized` | Balances clarity and tokens (true/false not T/F) | AI workflows, prompts |
  
@@ -117,8 +116,7 @@ F,2,Bob
    ]
  };
  
- // Auto mode - let ZON decide
- const auto = encodeAdaptive(data, { mode: 'auto' });
+
  
  // Compact mode - maximum compression
  const compact = encodeAdaptive(data, { mode: 'compact' });
@@ -136,7 +134,7 @@ F,2,Bob
  **Debug Mode:**
  
  ```typescript
- const result = encodeAdaptive(data, { mode: 'auto', debug: true });
+ const result = encodeAdaptive(data, { mode: 'compact', debug: true });
  console.log(result.decisions);  // See why ZON chose this mode
  console.log(result.output);     // The encoded string
  ```

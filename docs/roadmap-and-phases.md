@@ -18,7 +18,7 @@ This document outlines the comprehensive development phases completed to bring Z
 
 - **Features:**
   - **4 Encoding Modes:**
-    - `auto`: Smart selection based on analysis.
+
     - `compact`: Minimal whitespace, maximum density.
     - `readable`: Human-friendly formatting.
     - `llm-optimized`: Balanced for token efficiency and LLM comprehension.

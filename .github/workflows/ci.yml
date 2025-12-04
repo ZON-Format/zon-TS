@@ -37,17 +37,17 @@ jobs:
 
     - name: Verify examples generated
       run: |
-        if [ ! -f "examples/10_dirty_data.zonf" ]; then
+        if [ ! -f "examples/modes/10_dirty_data_compact.zonf" ]; then
           echo "Error: 10_dirty_data.zonf not generated"
           exit 1
         fi
-        if [ ! -f "examples/13_deep_recursion.zonf" ]; then
+        if [ ! -f "examples/modes/13_deep_recursion_compact.zonf" ]; then
           echo "Error: 13_deep_recursion.zonf not generated"
           exit 1
         fi
 
     - name: Verify roundtrip (examples)
-      run: npx ts-node scripts/verify_roundtrip.ts
+      run: npx ts-node scripts/verify_roundtrip_modes.ts
 
     - name: Verify roundtrip (comprehensive)
       run: node benchmarks/scripts/verify-comprehensive-roundtrip.js

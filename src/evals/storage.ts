@@ -35,7 +35,7 @@ export class FileEvalStorage implements EvalStorage {
     
     fs.writeFileSync(filepath, JSON.stringify(result, null, 2), 'utf-8');
     
-    // Also save as latest for this config
+
     const latestFilename = `${result.config.name}-latest.json`;
     const latestFilepath = path.join(this.storageDir, latestFilename);
     fs.writeFileSync(latestFilepath, JSON.stringify(result, null, 2), 'utf-8');
@@ -92,10 +92,10 @@ export class FileEvalStorage implements EvalStorage {
       results.push(result);
     }
     
-    // Sort by timestamp descending
+
     results.sort((a, b) => b.timestamp - a.timestamp);
     
-    // Apply limit
+
     if (filter?.limit) {
       results = results.slice(0, filter.limit);
     }

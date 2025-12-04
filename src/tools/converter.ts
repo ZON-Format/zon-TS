@@ -97,7 +97,7 @@ export class BatchConverter {
    * Convert a single item
    */
   private convertSingle(data: any, from: string, to: string): any {
-    // Normalize input
+
     let normalized: any;
     
     if (from === 'json') {
@@ -108,7 +108,7 @@ export class BatchConverter {
       normalized = decodeBinary(data);
     }
     
-    // Convert to target
+
     if (to === 'json') {
       return JSON.stringify(normalized, null, 2);
     } else if (to === 'zon') {
@@ -136,7 +136,7 @@ export function autoConvert(
   targetFormat: 'json' | 'zon' | 'binary',
   options?: ConversionOptions
 ): string | Uint8Array {
-  // Detect source format
+
   let sourceFormat: 'json' | 'zon' | 'binary';
   
   if (input instanceof Uint8Array) {
@@ -147,7 +147,7 @@ export function autoConvert(
     sourceFormat = 'zon';
   }
   
-  // Convert
+
   const converter = new BatchConverter();
   converter.add(input, sourceFormat, targetFormat);
   return converter.convert()[0];

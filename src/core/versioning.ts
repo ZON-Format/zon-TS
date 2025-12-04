@@ -6,7 +6,7 @@
  */
 
 export interface ZonDocumentMetadata {
-  /** Semantic version of the document format (e.g., "1.1.0") */
+  /** Semantic version of the document format (e.g., "1.3.0") */
   version: string;
   
   /** Optional schema identifier (e.g., "user-profile-v2") */
