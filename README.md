@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/zon-format.svg)](https://www.npmjs.com/package/zon-format)
 [![GitHub stars](https://img.shields.io/github/stars/ZON-Format/zon-TS?style=social)](https://github.com/ZON-Format/zon-TS)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/tests-297%2F297  %20passing-brightgreen.svg)](#quality--testing)
+[![Tests](https://img.shields.io/badge/tests-297%2F297%20passing-brightgreen.svg)](#quality--testing)
 [![npm downloads](https://img.shields.io/npm/dm/zon-format?color=red)](https://www.npmjs.com/package/zon-format)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
