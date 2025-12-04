@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Code Quality**: Refactored entire codebase to remove inline implementation comments, relying on clear code structure and JSDoc.
-- **Documentation**: Updated `SPEC.md` and versioning utilities to reflect v1.3.0.
+- **Documentation**: Updated `SPEC.md`, `docs/advanced-features.md`, and all other documentation files to reflect v1.3.0.
+- **CI/CD**: Updated GitHub Workflows (`ci.yml`, `llm-evals.yml`) to use Node 20 and correct script paths for example generation and verification.
+- **Evaluation Scripts**: Updated `eval:baseline` and `eval:check-regressions` to support `--type=full` for comprehensive accuracy benchmarks.
+
+### Fixed
+- **ZonDecoder**: Fixed a critical bug where escaped quotes (`""`) inside a quoted string caused incorrect splitting of values.
+- **Round-Trip Verification**: Fixed round-trip failures in `llm-optimized` mode by normalizing timestamps in datasets to include milliseconds (`.000Z`).
+- **Utils**: Fixed `parseValue` to correctly handle ZON-style double quoting (`""`) mixed with standard JSON escapes.
+
+### Added
+- **Documentation**: Added "Adaptive Encoding" and "Binary Format" sections to `docs/advanced-features.md`.
 
 ## [1.2.0] - 2025-12-03
 
