@@ -5,6 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 [![Tests](https://img.shields.io/badge/tests-297%2F297%20passing-brightgreen.svg)](#quality--testing)
 [![npm downloads](https://img.shields.io/npm/dm/zon-format?color=red)](https://www.npmjs.com/package/zon-format)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/ZON-Format/zon-TS?utm_source=oss&utm_medium=github&utm_campaign=ZON-Format%2Fzon-TS&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 # ZON Format → JSON is dead. TOON was cute. ZON just won.
