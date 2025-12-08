@@ -44,7 +44,6 @@ bun add zon-format
 - [Installation & Quick Start](#installation--quick-start)
 - [Format Overview](#format-overview)
 - [API Reference](#api-reference)
-- [Roadmap & Status](#roadmap--status)
 - [Documentation](#documentation)
 
 ---
@@ -1258,6 +1257,10 @@ Comprehensive guides for every aspect of ZON:
   - Size comparisons
 
 ---
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ZON-Format/ZON-TS&type=timeline&legend=bottom-right)](https://www.star-history.com/#ZON-Format/ZON-TS&type=timeline&legend=bottom-right)
 
 ## Links
 
