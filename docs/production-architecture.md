@@ -254,8 +254,8 @@ function logFormatStats(data: any, label: string) {
   const stats = compareFormats(data);
   
   console.log(`[${label}] Format Sizes:`);
-  console.log(`  ZON:    ${stats.zon} bytes`);
-  console.log(`  Binary: ${stats.binary} bytes (${stats.savings.binaryVsZon.toFixed(1)}% savings)`);
+  console.log(`  ZON:    ${stats.zonf} bytes`);
+  console.log(`  Binary: ${stats.binary} bytes (${stats.savings.binaryVsZonf.toFixed(1)}% savings)`);
   console.log(`  JSON:   ${stats.json} bytes`);
 }
 ```
