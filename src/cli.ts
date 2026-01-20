@@ -32,7 +32,7 @@ function printUsage() {
   console.error('  diff     Compare two ZON files');
   console.error('Options:');
   console.error('  --format <json|csv|yaml|binary>  Specify format');
-  console.error('  --to <zon|json|binary>           Target format for convert');
+  console.error('  --to <zonf|json|binary>          Target format for convert');
   console.error('  --colors                          Use syntax highlighting');
   console.error('  --strict                          Strict validation mode');
 }
@@ -171,9 +171,9 @@ try {
     console.log(`Types Found:    ${Array.from(stats.types).join(', ')}`);
     console.log('');
     console.log('Format Sizes:');
-    console.log(`  ZON:    ${sizes.zon} bytes`);
-    console.log(`  Binary: ${sizes.binary} bytes (-${sizes.savings.binaryVsZon.toFixed(1)}%)`);
-    console.log(`  JSON:   ${sizes.json} bytes (+${((sizes.json/sizes.zon - 1) * 100).toFixed(1)}%)`);
+    console.log(`  ZON:    ${sizes.zonf} bytes`);
+    console.log(`  Binary: ${sizes.binary} bytes (-${sizes.savings.binaryVsZonf.toFixed(1)}%)`);
+    console.log(`  JSON:   ${sizes.json} bytes (+${((sizes.json/sizes.zonf - 1) * 100).toFixed(1)}%)`);
   } else if (command === 'diff') {
     const file2 = args[2];
     if (!file2) {
@@ -230,7 +230,7 @@ try {
     const formatArg = args.find(a => a.startsWith('--format='));
     const toArg = args.find(a => a.startsWith('--to='));
     const format = formatArg ? formatArg.split('=')[1] : ext.replace('.', '');
-    const targetFormat = toArg ? toArg.split('=')[1] : 'zon';
+    const targetFormat = toArg ? toArg.split('=')[1] : 'zonf';
 
     let data;
     if (format === 'binary' || format === 'zonb') {
@@ -249,7 +249,7 @@ try {
       process.exit(1);
     }
     
-    if (targetFormat === 'zon') {
+    if (targetFormat === 'zonf') {
       console.log(encode(data));
     } else if (targetFormat === 'binary') {
       const binary = encodeBinary(data);

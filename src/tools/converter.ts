@@ -80,7 +80,7 @@ export class BatchConverter {
   /**
    * Queue a conversion
    */
-  add(data: any, from: 'json' | 'zon' | 'binary', to: 'json' | 'zon' | 'binary'): void {
+  add(data: any, from: 'json' | 'zonf' | 'binary', to: 'json' | 'zonf' | 'binary'): void {
     this.conversions.push({ from, to, data });
   }
   
@@ -102,7 +102,7 @@ export class BatchConverter {
     
     if (from === 'json') {
       normalized = typeof data === 'string' ? JSON.parse(data) : data;
-    } else if (from === 'zon') {
+    } else if (from === 'zonf') {
       normalized = decode(data);
     } else if (from === 'binary') {
       normalized = decodeBinary(data);
@@ -111,7 +111,7 @@ export class BatchConverter {
 
     if (to === 'json') {
       return JSON.stringify(normalized, null, 2);
-    } else if (to === 'zon') {
+    } else if (to === 'zonf') {
       return encode(normalized);
     } else if (to === 'binary') {
       return encodeBinary(normalized);
@@ -133,18 +133,18 @@ export class BatchConverter {
  */
 export function autoConvert(
   input: string | Uint8Array,
-  targetFormat: 'json' | 'zon' | 'binary',
+  targetFormat: 'json' | 'zonf' | 'binary',
   options?: ConversionOptions
 ): string | Uint8Array {
 
-  let sourceFormat: 'json' | 'zon' | 'binary';
+  let sourceFormat: 'json' | 'zonf' | 'binary';
   
   if (input instanceof Uint8Array) {
     sourceFormat = 'binary';
   } else if (input.trim().startsWith('{') || input.trim().startsWith('[')) {
     sourceFormat = 'json';
   } else {
-    sourceFormat = 'zon';
+    sourceFormat = 'zonf';
   }
   
 

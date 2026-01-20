@@ -12,9 +12,9 @@ import type { ZonSchema } from '../schema/schema';
 /**
  * Calculate the encoded size of data in different formats
  */
-export function size(data: any, format: 'zon' | 'binary' | 'json' = 'zon'): number {
+export function size(data: any, format: 'zonf' | 'binary' | 'json' = 'zonf'): number {
   switch (format) {
-    case 'zon':
+    case 'zonf':
       return encode(data).length;
     case 'binary':
       return encodeBinary(data).length;
@@ -27,27 +27,27 @@ export function size(data: any, format: 'zon' | 'binary' | 'json' = 'zon'): numb
  * Compare sizes across all formats
  */
 export function compareFormats(data: any): {
-  zon: number;
+  zonf: number;
   binary: number;
   json: number;
   savings: {
-    zonVsJson: number;
+    zonfVsJson: number;
     binaryVsJson: number;
-    binaryVsZon: number;
+    binaryVsZonf: number;
   };
 } {
-  const zonSize = size(data, 'zon');
+  const zonfSize = size(data, 'zonf');
   const binarySize = size(data, 'binary');
   const jsonSize = size(data, 'json');
   
   return {
-    zon: zonSize,
+    zonf: zonfSize,
     binary: binarySize,
     json: jsonSize,
     savings: {
-      zonVsJson: ((1 - zonSize / jsonSize) * 100),
+      zonfVsJson: ((1 - zonfSize / jsonSize) * 100),
       binaryVsJson: ((1 - binarySize / jsonSize) * 100),
-      binaryVsZon: ((1 - binarySize / zonSize) * 100)
+      binaryVsZonf: ((1 - binarySize / zonfSize) * 100)
     }
   };
 }
