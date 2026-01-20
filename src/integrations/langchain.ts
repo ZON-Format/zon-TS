@@ -36,7 +36,7 @@ items:@(2):id,name
    */
   async parse(text: string): Promise<T> {
     try {
-      const cleaned = text.replace(/```(zon|zonf)?/g, "").trim();
+      const cleaned = text.replace(/```zonf?/g, "").trim();
       return decode(cleaned) as T;
     } catch (e: any) {
       throw new Error(`Failed to parse ZON output: ${e.message}`);
