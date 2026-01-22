@@ -12,7 +12,7 @@ export interface ZonDocumentMetadata {
   /** Optional schema identifier (e.g., "user-profile-v2") */
   schemaId?: string;
   
-  /** Encoding format used ("zon" | "zon-binary") */
+  /** Encoding format used ("zonf" | "zonf-binary") */
   encoding?: string;
   
   /** Unix timestamp when document was created */
@@ -42,7 +42,7 @@ export function embedVersion(
   data: any,
   version: string,
   schemaId?: string,
-  encoding: string = 'zon'
+  encoding: string = 'zonf'
 ): any {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     throw new Error('Can only embed version in root objects');

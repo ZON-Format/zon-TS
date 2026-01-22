@@ -81,21 +81,21 @@ for (const datasetName of datasetNames) {
   
   results.byDataset[datasetName] = {
     gpt4o: {
-      zon: zonTokensGPT,
+      zonf: zonTokensGPT,
       toon: toonTokensGPT,
       json: jsonTokensGPT,
       savingsVsTOON: parseFloat(savingsVsTOON_GPT),
       savingsVsJSON: parseFloat(savingsVsJSON_GPT)
     },
     claude: {
-      zon: zonTokensClaude,
+      zonf: zonTokensClaude,
       toon: toonTokensClaude,
       json: jsonTokensClaude,
       savingsVsTOON: parseFloat(savingsVsTOON_Claude),
       savingsVsJSON: parseFloat(savingsVsJSON_Claude)
     },
     llama: {
-      zon: zonTokensLlama,
+      zonf: zonTokensLlama,
       toon: toonTokensLlama,
       json: jsonTokensLlama,
       savingsVsTOON: parseFloat(savingsVsTOON_Llama),

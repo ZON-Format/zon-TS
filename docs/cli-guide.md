@@ -221,17 +221,13 @@ diff <(zon format data.zonf) data.zonf
 
 ### `.zonf`
 
-**ZON Format** - The standard extension for ZON files.
+**ZON Format** - The standard and only extension for ZON files.
 
 ```bash
 users.zonf
 config.zonf
 data.zonf
 ```
-
-### `.zon`
-
-Alternative extension (also supported by VS Code extension).
 
 ---
 

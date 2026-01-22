@@ -24,7 +24,7 @@ describe('ZON Versioning', () => {
       expect(versioned.__zon_meta).toBeDefined();
       expect(versioned.__zon_meta.version).toBe('2.0.0');
       expect(versioned.__zon_meta.schemaId).toBe('user-schema');
-      expect(versioned.__zon_meta.encoding).toBe('zon');
+      expect(versioned.__zon_meta.encoding).toBe('zonf');
       expect(versioned.__zon_meta.timestamp).toBeDefined();
       expect(versioned.users).toEqual(data.users);
     });
@@ -50,7 +50,7 @@ describe('ZON Versioning', () => {
         __zon_meta: {
           version: '1.5.0',
           schemaId: 'test-schema',
-          encoding: 'zon',
+          encoding: 'zonf',
           timestamp: 1234567890
         },
         users: []
@@ -79,7 +79,7 @@ describe('ZON Versioning', () => {
   describe('stripVersion', () => {
     it('should remove version metadata', () => {
       const data = {
-        __zon_meta: { version: '1.0.0', encoding: 'zon', timestamp: 123 },
+        __zon_meta: { version: '1.0.0', encoding: 'zonf', timestamp: 123 },
         users: [{ id: 1 }]
       };
 
