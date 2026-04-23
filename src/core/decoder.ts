@@ -1,6 +1,6 @@
 import { TABLE_MARKER, META_SEPARATOR, MAX_DOCUMENT_SIZE, MAX_LINE_LENGTH, MAX_ARRAY_LENGTH, MAX_OBJECT_KEYS, MAX_NESTING_DEPTH } from './constants';
 import { ZonDecodeError } from './exceptions';
-import { parseValue } from './utils';
+import { parseValue, parseKey } from './utils';
 import { extractVersion, stripVersion, type ZonDocumentMetadata } from './versioning';
 
 export interface DecodeOptions {
@@ -94,7 +94,7 @@ export class ZonDecoder {
       const dictMatch = trimmedLine.match(/^([\w\.]+)\[(\d+)\]:(.+)$/);
       if (dictMatch && !trimmedLine.startsWith(TABLE_MARKER)) {
         const [, col, , vals] = dictMatch;
-        pendingDictionaries.set(col, vals.split(','));
+        pendingDictionaries.set(col, this._splitByDelimiter(vals, ',').map(v => this._parseValue(v)));
         continue;
       }
 
@@ -612,7 +612,7 @@ export class ZonDecoder {
           continue;
         }
 
-        const key = this._parseValue(keyStr);
+        const key = this._parseKey(keyStr);
         const val = this._parseZonNode(valStr, depth + 1);
         obj[key] = val;
       }
@@ -745,7 +745,7 @@ export class ZonDecoder {
                 // Handle implicit array item starting with dash in value?
                 // No, _parseZonNode handles that recursively.
                 
-                const key = this._parseValue(keyStr);
+                const key = this._parseKey(keyStr);
                 const val = this._parseZonNode(valStr, depth + 1);
                 obj[key] = val;
              }
@@ -823,7 +823,7 @@ export class ZonDecoder {
                 const colonIdx = this._findDelimiter(item, ':');
                 const keyStr = item.substring(0, colonIdx).trim();
                 const valStr = item.substring(colonIdx + 1).trim();
-                const key = this._parseValue(keyStr);
+                const key = this._parseKey(keyStr);
                 const val = this._parseZonNode(valStr, depth + 1);
                 obj[key] = val;
              }
@@ -856,7 +856,7 @@ export class ZonDecoder {
                    const colonIdx = this._findDelimiter(line.trim(), ':');
                    const keyStr = line.substring(0, colonIdx).trim();
                    const valStr = line.substring(colonIdx + 1).trim();
-                   const key = this._parseValue(keyStr);
+                   const key = this._parseKey(keyStr);
                    const val = this._parseZonNode(valStr, depth + 1);
                    obj[key] = val;
                 }
@@ -1041,6 +1041,10 @@ export class ZonDecoder {
     }
     
     return parsed;
+  }
+
+  private _parseKey(val: string): string {
+    return parseKey(val);
   }
 
 
