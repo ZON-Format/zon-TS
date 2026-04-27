@@ -449,7 +449,9 @@ export class ZonEncoder {
     const lines: string[] = [];
 
     for (const [col, values] of dictionaries) {
-      lines.push(`${col}[${values.length}]:${values.join(',')}`);
+      // Quote dictionary values that contain special characters
+      const formattedValues = values.map(v => this._formatValue(v));
+      lines.push(`${col}[${values.length}]:${formattedValues.join(',')}`);
     }
 
     const dictCols = Array.from(dictionaries.keys());
@@ -628,7 +630,8 @@ export class ZonEncoder {
       const items: string[] = [];
       for (const k of keys) {
         let kStr = String(k);
-        if (/[,:\{\}\[\]"]/.test(kStr)) {
+        // Quote keys with special chars OR boolean/null keywords
+        if (/[,:\{\}\[\]"]/.test(kStr) || /^(true|false|t|f|null|none|nil)$/i.test(kStr)) {
           kStr = JSON.stringify(kStr);
         }
 

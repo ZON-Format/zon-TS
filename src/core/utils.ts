@@ -22,6 +22,41 @@ export function quoteString(s: string): string {
 }
 
 /**
+ * Parses a ZON dictionary key string.
+ *
+ * Unlike parseValue, this does NOT convert boolean keywords (t, f, true, false)
+ * or null keywords to their typed equivalents. Keys are always strings.
+ *
+ * @param val - The key string to parse
+ * @returns The parsed key as a string
+ */
+export function parseKey(val: string): string {
+  const trimmed = val.trim();
+
+  if (trimmed.startsWith('"')) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      if (trimmed.endsWith('"')) {
+        const inner = trimmed.slice(1, -1);
+        const fixed = inner.replace(/""/g, '\\"');
+        try {
+          return JSON.parse(`"${fixed}"`);
+        } catch {
+          return trimmed.slice(1, -1).replace(/""/g, '"');
+        }
+      }
+    }
+  }
+
+  if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
+}
+
+/**
  * Parses a ZON value string into its corresponding primitive type.
  * Handles booleans, nulls, numbers, arrays, objects, and quoted strings.
  * 
